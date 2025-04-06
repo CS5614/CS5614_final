@@ -1,6 +1,6 @@
 import json
 
-input_file = "dc_rental_listings.json"
+input_file = "./raw_data/dc_rental_listings.json"
 
 # Read the JSON file
 with open(input_file, "r", encoding="utf-8") as f:
