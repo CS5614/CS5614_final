@@ -1,6 +1,9 @@
 import requests
 import json
 
+import load_dotenv
+import os
+load_dotenv.load_dotenv()
 
 limit = 500
 offset = 0
@@ -10,7 +13,7 @@ while True:
     url = f"https://api.rentcast.io/v1/listings/rental/long-term?state=DC&status=Active&limit={limit}&offset={offset}"
     headers = {
         "accept": "application/json",
-        "X-Api-Key": "136e8201985e4957896d7f51525c558b"
+        "X-Api-Key": os.getenv("RENTAL_API_KEY"),
     }
     response = requests.get(url, headers=headers)
 
