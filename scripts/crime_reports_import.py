@@ -23,7 +23,7 @@ def import_crime_reports():
     query = """
         INSERT INTO crime_reports (name, date, lat, lon, geom)
         VALUES %s
-        ON CONFLICT (id) DO NOTHING;
+        ON CONFLICT (name, date, lat, lon) DO NOTHING;
     """
     with open("../raw_data/Crime_Incidents_in_2023.csv", "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
