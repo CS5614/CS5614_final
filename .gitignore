@@ -173,4 +173,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
-client/src/config/index.ts
+
+# .env
+.env
+
