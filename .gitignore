@@ -50,7 +50,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
-
+.github/
 
 # Translations
 *.mo
@@ -177,3 +177,6 @@ cython_debug/
 # .env
 .env
 
+client/src/config/index.ts
+.github/copilot-instructions.md
+.github/copilot-instructions.md

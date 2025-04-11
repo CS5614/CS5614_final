@@ -19,9 +19,9 @@ def import_open_street_parks():
 
     # Prepare INSERT query
     query = """
-        INSERT INTO open_street (id, lat, lon, name, leisure, geom)
+        INSERT INTO open_street (lat, lon, name, leisure, geom)
         VALUES %s
-        ON CONFLICT (id) DO NOTHING;
+        ON CONFLICT (lat, lon) DO NOTHING;
     """
 
     with open("../raw_data/openstreet_parks.json", "r", encoding="utf-8") as f:
@@ -32,7 +32,6 @@ def import_open_street_parks():
         # print(elements)
         values = [
             (
-                ele.get("id"),
                 ele.get("lat"),
                 ele.get("lon"),
                 ele["tags"].get("name"),
@@ -51,8 +50,8 @@ def import_open_street_parks():
         execute_values(
             cur,
             query,
-            [(v[0], v[1], v[2], v[3], v[4], v[5], v[6]) for v in values],
-            template="(%s, %s, %s, %s, %s, ST_SetSRID(ST_MakePoint(%s, %s), 4326))",
+            [(v[0], v[1], v[2], v[3], v[4], v[5]) for v in values],
+            template="(%s, %s, %s, %s, ST_SetSRID(ST_MakePoint(%s, %s), 4326))",
         )
         print("Batch insert executed")
 
