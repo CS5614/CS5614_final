@@ -174,8 +174,7 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# .env
-.env
+.idea
 
 client/src/config/index.ts
 .github/copilot-instructions.md
