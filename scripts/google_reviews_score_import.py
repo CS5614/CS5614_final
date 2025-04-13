@@ -16,7 +16,7 @@ async def fetch_place_id(session, listing_name):
     }
     async with session.post(url, headers=headers, data=payload) as response:
         response_json = await response.json()
-        if "places" in response_json:
+        if "places" in response_json and response_json["places"]:
             return response_json["places"][0]["id"]
     return None
 
