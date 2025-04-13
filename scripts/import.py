@@ -2,7 +2,7 @@
 
 import bus_stops_import
 import openstreet_parks_import
-import scripts.crime_reports_import as crime_reports_import
+import crime_reports_import
 
 
 if __name__ == "__main__":
