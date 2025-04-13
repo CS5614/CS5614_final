@@ -41,6 +41,11 @@ class DatabaseConnection:
             try:
                 if exc_type:
                     logging.warning(f"Exception occurred in 'with' block ({exc_type}), rolling back transaction.")
+                    try:
+                        self.__connection.rollback()
+                        logging.info("Transaction rolled back successfully.")
+                    except psycopg2.Error as e:
+                        logging.error(f"Error during rollback: {e}")
                 else:
                     pass
             except psycopg2.Error as e:
