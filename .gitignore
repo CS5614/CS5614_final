@@ -50,7 +50,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
-
+.github/
 
 # Translations
 *.mo
@@ -180,3 +180,6 @@ pyproject.toml
 uv.lock
 *.ipynb_checkpoints
 *.DS_Store
+
+.github/copilot-instructions.md
+.github/copilot-instructions.md
