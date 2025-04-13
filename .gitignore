@@ -178,3 +178,5 @@ cython_debug/
 .python-version
 pyproject.toml
 uv.lock
+*.ipynb_checkpoints
+*.DS_Store
