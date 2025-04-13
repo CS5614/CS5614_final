@@ -175,7 +175,11 @@ cython_debug/
 .pypirc
 
 .idea
+.python-version
+pyproject.toml
+uv.lock
+*.ipynb_checkpoints
+*.DS_Store
 
-client/src/config/index.ts
 .github/copilot-instructions.md
 .github/copilot-instructions.md
