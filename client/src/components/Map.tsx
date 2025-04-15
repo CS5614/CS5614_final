@@ -16,7 +16,6 @@ export interface RentalScoreLocation {
   transitScore: number;
   bikeScore: number;
   airQualityScore: number;
-  crimeNumber: number;
   busStopsNumber: number;
   metroStationNumber: number;
   openStreetNumber: number;
@@ -196,7 +195,6 @@ function MapComponent() {
                 <li>Transit Score: {selected.transitScore}</li>
                 <li>Bike Score: {selected.bikeScore}</li>
                 <li>Air Quality: {selected.airQualityScore}</li>
-                <li>Crime Reports: {selected.crimeNumber}</li>
                 <li>Bus Stops: {selected.busStopsNumber}</li>
                 <li>Metro Stations: {selected.metroStationNumber}</li>
                 <li>Parks Nearby: {selected.openStreetNumber}</li>
@@ -230,7 +228,6 @@ function fetchRentalQol(
       transitScore: 78,
       bikeScore: 67,
       airQualityScore: 90,
-      crimeNumber: 12,
       busStopsNumber: 5,
       metroStationNumber: 2,
       openStreetNumber: 3,
@@ -245,7 +242,6 @@ function fetchRentalQol(
       transitScore: 75,
       bikeScore: 70,
       airQualityScore: 85,
-      crimeNumber: 5,
       busStopsNumber: 3,
       metroStationNumber: 1,
       openStreetNumber: 2,
@@ -260,7 +256,6 @@ function fetchRentalQol(
       transitScore: 85,
       bikeScore: 75,
       airQualityScore: 95,
-      crimeNumber: 3,
       busStopsNumber: 4,
       metroStationNumber: 2,
       openStreetNumber: 5,
@@ -275,7 +270,6 @@ function fetchRentalQol(
       transitScore: 65,
       bikeScore: 60,
       airQualityScore: 80,
-      crimeNumber: 8,
       busStopsNumber: 2,
       metroStationNumber: 1,
       openStreetNumber: 1,
@@ -290,7 +284,6 @@ function fetchRentalQol(
       transitScore: 82,
       bikeScore: 72,
       airQualityScore: 92,
-      crimeNumber: 4,
       busStopsNumber: 6,
       metroStationNumber: 3,
       openStreetNumber: 4,
@@ -305,7 +298,6 @@ function fetchRentalQol(
       transitScore: 70,
       bikeScore: 65,
       airQualityScore: 88,
-      crimeNumber: 7,
       busStopsNumber: 3,
       metroStationNumber: 2,
       openStreetNumber: 2,
@@ -320,7 +312,6 @@ function fetchRentalQol(
       transitScore: 90,
       bikeScore: 85,
       airQualityScore: 98,
-      crimeNumber: 2,
       busStopsNumber: 7,
       metroStationNumber: 4,
       openStreetNumber: 6,
