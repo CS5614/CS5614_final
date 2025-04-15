@@ -41,62 +41,172 @@ const getColorByQOL = (score: number) => {
   return "red";
 };
 
+function filterRentalLocations(
+  locations: RentalScoreLocation[],
+  filters: {
+    fQolScore: number;
+    fCrimeNumber: number;
+    fWalkScore: number;
+    fBusStopsNumber: number;
+  }
+): RentalScoreLocation[] {
+  return locations.filter((loc) => {
+    if (filters.fQolScore !== undefined && loc.qolScore < filters.fQolScore)
+      return false;
+    if (
+      filters.fCrimeNumber !== undefined &&
+      loc.crimeNumber > filters.fCrimeNumber
+    )
+      return false;
+    if (filters.fWalkScore !== undefined && loc.walkScore < filters.fWalkScore)
+      return false;
+    if (
+      filters.fBusStopsNumber !== undefined &&
+      loc.busStopsNumber > filters.fBusStopsNumber
+    )
+      return false;
+    return true;
+  });
+}
+
 function MapComponent() {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: config.googleMapsApiKey,
   });
 
   const [locations, setLocations] = useState<RentalScoreLocation[]>([]);
+  const [filteredLocations, setFilteredLocations] = useState<
+    RentalScoreLocation[]
+  >([]);
   const [selected, setSelected] = useState<RentalScoreLocation | null>(null);
+  const [filters, setFilters] = useState({
+    minQolScore: 0,
+    maxCrimeNumber: 0,
+    minWalkScore: 0,
+    maxBusStopsNumber: 0,
+  });
 
   useEffect(() => {
     fetchRentalQol(setLocations);
   }, []);
 
+  useEffect(() => {
+    setFilteredLocations(
+      filterRentalLocations(locations, {
+        fQolScore: filters.minQolScore,
+        fCrimeNumber: filters.maxCrimeNumber,
+        fWalkScore: filters.minWalkScore,
+        fBusStopsNumber: filters.maxBusStopsNumber,
+      })
+    );
+  }, [locations, filters]);
+
   if (!isLoaded) return <div>Loading Map...</div>;
 
   return (
-    <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={12}>
-      {locations.map((loc, index) => (
-        <Marker
-          key={index}
-          position={{ lat: loc.lat, lng: loc.long }}
-          icon={{
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 10,
-            fillColor: getColorByQOL(loc.qolScore),
-            fillOpacity: 1,
-            strokeWeight: 1,
-          }}
-          onClick={() => {
-            setSelected(loc);
-          }}
-        />
-      ))}
+    <div>
+      <div className="filter-container">
+        <h3>Filters</h3>
+        <label>
+          Min QOL Score:
+          <input
+            type="range"
+            value={filters.minQolScore}
+            onChange={(e) =>
+              setFilters({
+                ...filters,
+                minQolScore: Number(e.target.value),
+              })
+            }
+          />
+          <span>{filters.minQolScore}</span>
+        </label>
+        <label>
+          Max Crime Number:
+          <input
+            type="range"
+            value={filters.maxCrimeNumber}
+            onChange={(e) =>
+              setFilters({
+                ...filters,
+                maxCrimeNumber: Number(e.target.value),
+              })
+            }
+          />
+          <span>{filters.maxCrimeNumber}</span>
+        </label>
+        <label>
+          Min Walk Score:
+          <input
+            type="range"
+            value={filters.minWalkScore}
+            onChange={(e) =>
+              setFilters({
+                ...filters,
+                minWalkScore: Number(e.target.value),
+              })
+            }
+          />
+          <span>{filters.minWalkScore}</span>
+        </label>
+        <label>
+          Max Bus Stops Number:
+          <input
+            type="range"
+            value={filters.maxBusStopsNumber}
+            onChange={(e) =>
+              setFilters({
+                ...filters,
+                maxBusStopsNumber: Number(e.target.value),
+              })
+            }
+          />
+          <span>{filters.maxBusStopsNumber}</span>
+        </label>
+      </div>
 
-      {selected && (
-        <InfoWindow
-          position={{ lat: selected.lat, lng: selected.long }}
-          onCloseClick={() => setSelected(null)}
-        >
-          <div style={{ fontSize: "14px", color: "black" }}>
-            <strong>{selected.name}</strong>
-            <ul style={{ padding: 0, listStyle: "none" }}>
-              <li>QOL Score: {selected.qolScore}</li>
-              <li>Walk Score: {selected.walkScore}</li>
-              <li>Transit Score: {selected.transitScore}</li>
-              <li>Bike Score: {selected.bikeScore}</li>
-              <li>Air Quality: {selected.airQualityScore}</li>
-              <li>Crime Reports: {selected.crimeNumber}</li>
-              <li>Bus Stops: {selected.busStopsNumber}</li>
-              <li>Metro Stations: {selected.metroStationNumber}</li>
-              <li>Parks Nearby: {selected.openStreetNumber}</li>
-              <li>Review Score: {selected.reviewScore}</li>
-            </ul>
-          </div>
-        </InfoWindow>
-      )}
-    </GoogleMap>
+      <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={12}>
+        {filteredLocations.map((loc, index) => (
+          <Marker
+            key={index}
+            position={{ lat: loc.lat, lng: loc.long }}
+            icon={{
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 10,
+              fillColor: getColorByQOL(loc.qolScore),
+              fillOpacity: 1,
+              strokeWeight: 1,
+            }}
+            onClick={() => {
+              setSelected(loc);
+            }}
+          />
+        ))}
+
+        {selected && (
+          <InfoWindow
+            position={{ lat: selected.lat, lng: selected.long }}
+            onCloseClick={() => setSelected(null)}
+          >
+            <div style={{ fontSize: "14px", color: "black" }}>
+              <strong>{selected.name}</strong>
+              <ul style={{ padding: 0, listStyle: "none" }}>
+                <li>QOL Score: {selected.qolScore}</li>
+                <li>Walk Score: {selected.walkScore}</li>
+                <li>Transit Score: {selected.transitScore}</li>
+                <li>Bike Score: {selected.bikeScore}</li>
+                <li>Air Quality: {selected.airQualityScore}</li>
+                <li>Crime Reports: {selected.crimeNumber}</li>
+                <li>Bus Stops: {selected.busStopsNumber}</li>
+                <li>Metro Stations: {selected.metroStationNumber}</li>
+                <li>Parks Nearby: {selected.openStreetNumber}</li>
+                <li>Review Score: {selected.reviewScore}</li>
+              </ul>
+            </div>
+          </InfoWindow>
+        )}
+      </GoogleMap>
+    </div>
   );
 }
 
