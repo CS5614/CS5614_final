@@ -35,6 +35,15 @@ function filterRentalLocations(
     if (loc.qolScore < filters.fQolScore) return false;
     if (loc.walkScore < filters.fWalkScore) return false;
     if (loc.busStopsNumber < filters.fBusStopsNumber) return false;
+
+    // Fuzzy search by name
+    if (
+      filters.searchQuery &&
+      !loc.name.toLowerCase().includes(filters.searchQuery.toLowerCase())
+    ) {
+      return false;
+    }
+
     return true;
   });
   console.log("Filtered locations:", filter);
@@ -44,6 +53,7 @@ interface MapFilter {
   fQolScore: number;
   fWalkScore: number;
   fBusStopsNumber: number;
+  searchQuery: string; // New property for fuzzy search
 }
 function MapComponent() {
   const { isLoaded } = useJsApiLoader({
@@ -58,6 +68,7 @@ function MapComponent() {
     fQolScore: 0,
     fWalkScore: 0,
     fBusStopsNumber: 0,
+    searchQuery: "", // Initialize search query
   });
 
   useEffect(() => {
@@ -68,6 +79,7 @@ function MapComponent() {
       fQolScore: filters.fQolScore,
       fWalkScore: filters.fWalkScore,
       fBusStopsNumber: filters.fBusStopsNumber,
+      searchQuery: filters.searchQuery,
     });
 
     console.log("Filtered Locations:", filtered);
@@ -80,6 +92,19 @@ function MapComponent() {
     <div>
       <div className="filter-container">
         <h3>Filters</h3>
+        <label>
+          Search by Name:
+          <input
+            type="text"
+            value={filters.searchQuery}
+            onChange={(e) =>
+              setFilters({
+                ...filters,
+                searchQuery: e.target.value,
+              })
+            }
+          />
+        </label>
         <label>
           Min QOL Score:
           <input
