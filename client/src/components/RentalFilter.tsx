@@ -9,12 +9,14 @@ interface Props {
 const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
   return (
     <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-lg p-6 space-y-4">
-      <h3 className="text-xl font-semibold text-gray-800">Filters</h3>
+      <h3 className="text-xl font-semibold text-gray-900">Filters</h3>
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium">Search</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Search
+          </label>
           <input
-            className="w-full px-3 py-2 border rounded-md"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             type="text"
             value={filters.searchQuery}
             onChange={(e) =>
@@ -24,7 +26,7 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium">
+          <label className="block text-sm font-medium text-gray-700">
             Min QOL Score: {filters.fQolScore}
           </label>
           <input
@@ -40,7 +42,7 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium">
+          <label className="block text-sm font-medium text-gray-700">
             Min Walk Score: {filters.fWalkScore}
           </label>
           <input
@@ -56,7 +58,7 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium">
+          <label className="block text-sm font-medium text-gray-700">
             Min Bus Stops: {filters.fBusStopsNumber}
           </label>
           <input

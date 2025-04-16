@@ -1,15 +1,25 @@
 import Map from "./components/Map";
+import RentalFilter from "./components/RentalFilter";
+import { useState } from "react";
+import { MapFilter } from "./components/Map";
 import "./App.css";
 
 function App() {
+  const [filters, setFilters] = useState<MapFilter>({
+    fQolScore: 0,
+    fWalkScore: 0,
+    fBusStopsNumber: 0,
+    fPrice: 0,
+    searchQuery: "",
+  });
+
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center px-4 py-8 space-y-8">
-      <h1 className="text-3xl font-bold">Google Maps in React with Vite</h1>
-      <div className="flex w-full max-w-6xl gap-6">
-        <div className="w-80"></div>
-        <div className="flex-1 rounded-xl overflow-hidden shadow-lg">
-          <Map />
-        </div>
+    <div className="h-screen w-screen bg-gray-100 flex">
+      <div className="w-80 bg-white shadow-lg">
+        <RentalFilter filters={filters} setFilters={setFilters} />
+      </div>
+      <div className="flex-1">
+        <Map filters={filters} />
       </div>
     </div>
   );

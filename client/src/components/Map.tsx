@@ -8,8 +8,6 @@ import {
 import { RentalScoreContext } from "../contexts/RentalScoreContext";
 import { config } from "../config/index";
 import { RentalScore } from "../type";
-import "../assets/css/Map.css";
-import RentalFilter from "./RentalFilter";
 
 const containerStyle = {
   width: "100%",
@@ -36,21 +34,14 @@ export interface MapFilter {
   searchQuery: string;
 }
 
-const Map: React.FC = () => {
+const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: config.googleMapsApiKey,
   });
-  const rentalScores = useContext(RentalScoreContext);
 
+  const rentalScores = useContext(RentalScoreContext);
   const [filteredLocations, setFilteredLocations] = useState<RentalScore[]>([]);
   const [selected, setSelected] = useState<RentalScore>({} as RentalScore);
-  const [filters, setFilters] = useState<MapFilter>({
-    fQolScore: 0,
-    fWalkScore: 0,
-    fBusStopsNumber: 0,
-    fPrice: 0,
-    searchQuery: "",
-  });
 
   useEffect(() => {
     const filtered = filterRentalLocations(rentalScores, filters);
@@ -79,11 +70,6 @@ const Map: React.FC = () => {
 
   return (
     <div className="relative">
-      {/* Sidebar Filter Panel */}
-      <div className="w-80 p-4">
-        <RentalFilter filters={filters} setFilters={setFilters} />
-      </div>
-
       {/* Google Map */}
       <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={12}>
         {filteredLocations.map((loc, index) => (
@@ -106,7 +92,7 @@ const Map: React.FC = () => {
             position={{ lat: selected.lat, lng: selected.long }}
             onCloseClick={() => setSelected({} as RentalScore)}
           >
-            <div className="text-sm space-y-1">
+            <div className="text-sm space-y-1 text-gray-700">
               <strong className="block text-base">{selected.name}</strong>
               <ul className="list-none p-0">
                 <li>QOL Score: {selected.qolScore}</li>
