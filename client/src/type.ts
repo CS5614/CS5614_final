@@ -13,3 +13,14 @@ export interface RentalScore {
     reviewScore: number;
     price: number;
 }
+
+export interface MapFilter {
+    QolScore: number;
+    WalkScore: number;
+    BusStopsNumber: number;
+    Price: number;
+    AirQualityScore: number;
+    ParkNumber: number;
+    Review: number;
+    SearchQuery: string;
+}

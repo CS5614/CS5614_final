@@ -1,5 +1,5 @@
 import React from "react";
-import { MapFilter } from "./Map";
+import { MapFilter } from "../type";
 
 interface Props {
   filters: MapFilter;
@@ -8,73 +8,93 @@ interface Props {
 
 const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
   return (
-    <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-lg p-6 space-y-4">
-      <h3 className="text-xl font-semibold text-gray-900">Filters</h3>
+    <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
+      <h3 className="text-lg font-bold text-gray-800">Filters</h3>
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Search
+          <label className="block text-sm font-medium text-gray-600">
+            Enter address or building name
           </label>
           <input
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             type="text"
-            value={filters.searchQuery}
+            value={filters.SearchQuery}
             onChange={(e) =>
-              setFilters({ ...filters, searchQuery: e.target.value })
+              setFilters({ ...filters, SearchQuery: e.target.value })
             }
-            placeholder="Enter address or name"
+            placeholder="Search"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Min QOL Score: {filters.fQolScore}
+          <label className="block text-sm font-medium text-gray-600">
+            Price Range
           </label>
           <input
-            title="Adjust the minimum quality of life score"
+            title="Price Range"
             className="w-full"
             type="range"
-            min="0"
-            max="100"
-            value={filters.fQolScore}
+            min="1500"
+            max="4000"
+            value={filters.Price}
             onChange={(e) =>
-              setFilters({ ...filters, fQolScore: Number(e.target.value) })
+              setFilters({ ...filters, Price: Number(e.target.value) })
             }
           />
+          <div className="flex justify-between text-sm text-gray-500">
+            <span>$1,500</span>
+            <span>$4,000</span>
+          </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Min Walk Score: {filters.fWalkScore}
+          <label className="block text-sm font-medium text-gray-600">
+            Air Quality Index
           </label>
           <input
-            title="Adjust the minimum walk score"
-            className="w-full"
-            type="range"
-            min="0"
-            max="100"
-            value={filters.fWalkScore}
-            onChange={(e) =>
-              setFilters({ ...filters, fWalkScore: Number(e.target.value) })
-            }
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Min Bus Stops: {filters.fBusStopsNumber}
-          </label>
-          <input
-            title="Adjust the minimum number of bus stops"
-            className="w-full"
-            type="range"
-            min="0"
-            max="20"
-            value={filters.fBusStopsNumber}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            type="text"
+            value={filters.AirQualityScore}
             onChange={(e) =>
               setFilters({
                 ...filters,
-                fBusStopsNumber: Number(e.target.value),
+                AirQualityScore: Number(e.target.value),
               })
             }
+            placeholder="Search"
           />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-600">
+            Walk Score
+          </label>
+          <input
+            title="Walk Score"
+            className="w-full"
+            type="range"
+            min="0"
+            max="100"
+            value={filters.WalkScore}
+            onChange={(e) =>
+              setFilters({ ...filters, WalkScore: Number(e.target.value) })
+            }
+          />
+          <div className="text-sm text-gray-500">{filters.WalkScore}</div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-600">
+            Google Review
+          </label>
+          <input
+            title="Google Review"
+            className="w-full"
+            type="range"
+            min="0"
+            max="5"
+            value={filters.Review}
+            onChange={(e) =>
+              setFilters({ ...filters, Review: Number(e.target.value) })
+            }
+          />
+          <div className="text-sm text-gray-500">{filters.Review}</div>
         </div>
       </div>
     </div>

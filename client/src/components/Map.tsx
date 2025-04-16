@@ -7,7 +7,7 @@ import {
 } from "@react-google-maps/api";
 import { RentalScoreContext } from "../contexts/RentalScoreContext";
 import { config } from "../config/index";
-import { RentalScore } from "../type";
+import { MapFilter, RentalScore } from "../type";
 
 const containerStyle = {
   width: "100%",
@@ -25,14 +25,6 @@ const getColorByQOL = (score: number) => {
   if (score >= 40) return "orange";
   return "red";
 };
-
-export interface MapFilter {
-  fQolScore: number;
-  fWalkScore: number;
-  fBusStopsNumber: number;
-  fPrice: number;
-  searchQuery: string;
-}
 
 const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
   const { isLoaded } = useJsApiLoader({
@@ -53,13 +45,17 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
     filters: MapFilter
   ): RentalScore[] => {
     return locations.filter((loc) => {
-      if (loc.qolScore < filters.fQolScore) return false;
-      if (loc.walkScore < filters.fWalkScore) return false;
-      if (loc.busStopsNumber < filters.fBusStopsNumber) return false;
-      if (loc.price < filters.fPrice) return false;
+      if (loc.qolScore < filters.QolScore) return false;
+      if (loc.walkScore < filters.WalkScore) return false;
+      if (loc.busStopsNumber < filters.BusStopsNumber) return false;
+      if (loc.price < filters.Price) return false;
+      if (loc.airQualityScore < filters.AirQualityScore) return false;
+      if (loc.metroStationNumber < filters.BusStopsNumber) return false;
+      if (loc.openStreetNumber < filters.ParkNumber) return false;
+      if (loc.reviewScore < filters.Review) return false;
       if (
-        filters.searchQuery &&
-        !loc.name.toLowerCase().includes(filters.searchQuery.toLowerCase())
+        filters.SearchQuery &&
+        !loc.name.toLowerCase().includes(filters.SearchQuery.toLowerCase())
       )
         return false;
       return true;
@@ -78,12 +74,19 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
             position={{ lat: loc.lat, lng: loc.long }}
             icon={{
               path: google.maps.SymbolPath.CIRCLE,
-              scale: 10,
+              scale: 15, // Adjust scale to keep the oval size appropriate
               fillColor: getColorByQOL(loc.qolScore),
               fillOpacity: 1,
               strokeWeight: 1,
             }}
             onClick={() => setSelected(loc)}
+            label={{
+              text: loc.price.toString(),
+              color: "black",
+              fontSize: "12px",
+              fontWeight: "bold",
+              className: "text-center", // Ensures text is centered
+            }}
           />
         ))}
 

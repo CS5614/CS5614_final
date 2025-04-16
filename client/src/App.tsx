@@ -1,16 +1,19 @@
 import Map from "./components/Map";
 import RentalFilter from "./components/RentalFilter";
 import { useState } from "react";
-import { MapFilter } from "./components/Map";
 import "./App.css";
+import { MapFilter } from "./type";
 
 function App() {
   const [filters, setFilters] = useState<MapFilter>({
-    fQolScore: 0,
-    fWalkScore: 0,
-    fBusStopsNumber: 0,
-    fPrice: 0,
-    searchQuery: "",
+    QolScore: 0,
+    WalkScore: 0,
+    Price: 0,
+    AirQualityScore: 0,
+    BusStopsNumber: 0,
+    ParkNumber: 0,
+    Review: 0,
+    SearchQuery: "",
   });
 
   return (
