@@ -16,6 +16,7 @@ function getDefaultRentalScores(): RentalScore[] {
       metroStationNumber: 2,
       openStreetNumber: 3,
       reviewScore: 4.3,
+      price: 2500,
     },
     {
       lat: 38.934567,
@@ -30,6 +31,7 @@ function getDefaultRentalScores(): RentalScore[] {
       metroStationNumber: 1,
       openStreetNumber: 2,
       reviewScore: 4.0,
+      price: 3000,
     },
     {
       lat: 38.941234,
@@ -44,6 +46,7 @@ function getDefaultRentalScores(): RentalScore[] {
       metroStationNumber: 2,
       openStreetNumber: 5,
       reviewScore: 4.5,
+      price: 2700,
     },
     {
       lat: 38.94789,
@@ -58,6 +61,7 @@ function getDefaultRentalScores(): RentalScore[] {
       metroStationNumber: 1,
       openStreetNumber: 1,
       reviewScore: 3.8,
+      price: 2800,
     },
     {
       lat: 38.951234,
@@ -72,6 +76,7 @@ function getDefaultRentalScores(): RentalScore[] {
       metroStationNumber: 3,
       openStreetNumber: 4,
       reviewScore: 4.6,
+      price: 2750,
     },
     {
       lat: 38.95789,
@@ -86,6 +91,7 @@ function getDefaultRentalScores(): RentalScore[] {
       metroStationNumber: 2,
       openStreetNumber: 2,
       reviewScore: 4.1,
+      price: 2900,
     },
     {
       lat: 38.963456,
@@ -100,6 +106,7 @@ function getDefaultRentalScores(): RentalScore[] {
       metroStationNumber: 4,
       openStreetNumber: 6,
       reviewScore: 4.9,
+      price: 3200,
     },
   ];
   return rentalScores;

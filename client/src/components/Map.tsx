@@ -9,17 +9,18 @@ import { RentalScoreContext } from "../contexts/RentalScoreContext";
 import { config } from "../config/index";
 import { RentalScore } from "../type";
 import "../assets/css/Map.css";
+import RentalFilter from "./RentalFilter";
+
 const containerStyle = {
   width: "100%",
-  height: "600px",
+  height: "100vh",
 };
 
 const center = {
-  lat: 38.9072, // Default to Washington, DC
+  lat: 38.9072,
   lng: -77.0369,
 };
 
-// Color mapping based on qolScore ranges
 const getColorByQOL = (score: number) => {
   if (score >= 80) return "green";
   if (score >= 60) return "yellow";
@@ -27,39 +28,18 @@ const getColorByQOL = (score: number) => {
   return "red";
 };
 
-function filterRentalLocations(
-  locations: RentalScore[],
-  filters: MapFilter
-): RentalScore[] {
-  const filter = locations.filter((loc) => {
-    if (loc.qolScore < filters.fQolScore) return false;
-    if (loc.walkScore < filters.fWalkScore) return false;
-    if (loc.busStopsNumber < filters.fBusStopsNumber) return false;
-
-    // Fuzzy search by name
-    if (
-      filters.searchQuery &&
-      !loc.name.toLowerCase().includes(filters.searchQuery.toLowerCase())
-    ) {
-      return false;
-    }
-
-    return true;
-  });
-  console.log("Filtered locations:", filter);
-  return filter;
-}
-interface MapFilter {
+export interface MapFilter {
   fQolScore: number;
   fWalkScore: number;
   fBusStopsNumber: number;
-  searchQuery: string; // New property for fuzzy search
+  fPrice: number;
+  searchQuery: string;
 }
-function MapComponent() {
+
+const Map: React.FC = () => {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: config.googleMapsApiKey,
   });
-
   const rentalScores = useContext(RentalScoreContext);
 
   const [filteredLocations, setFilteredLocations] = useState<RentalScore[]>([]);
@@ -68,87 +48,43 @@ function MapComponent() {
     fQolScore: 0,
     fWalkScore: 0,
     fBusStopsNumber: 0,
-    searchQuery: "", // Initialize search query
+    fPrice: 0,
+    searchQuery: "",
   });
 
   useEffect(() => {
-    console.log("Rental Scores:", rentalScores);
-    console.log("Filters:", filters);
-
-    const filtered = filterRentalLocations(rentalScores, {
-      fQolScore: filters.fQolScore,
-      fWalkScore: filters.fWalkScore,
-      fBusStopsNumber: filters.fBusStopsNumber,
-      searchQuery: filters.searchQuery,
-    });
-
-    console.log("Filtered Locations:", filtered);
+    const filtered = filterRentalLocations(rentalScores, filters);
     setFilteredLocations(filtered);
   }, [rentalScores, filters]);
 
-  if (!isLoaded) return <div>Loading Map...</div>;
+  const filterRentalLocations = (
+    locations: RentalScore[],
+    filters: MapFilter
+  ): RentalScore[] => {
+    return locations.filter((loc) => {
+      if (loc.qolScore < filters.fQolScore) return false;
+      if (loc.walkScore < filters.fWalkScore) return false;
+      if (loc.busStopsNumber < filters.fBusStopsNumber) return false;
+      if (loc.price < filters.fPrice) return false;
+      if (
+        filters.searchQuery &&
+        !loc.name.toLowerCase().includes(filters.searchQuery.toLowerCase())
+      )
+        return false;
+      return true;
+    });
+  };
+
+  if (!isLoaded) return <div className="text-center p-6">Loading Map...</div>;
 
   return (
-    <div>
-      <div className="filter-container">
-        <h3>Filters</h3>
-        <label>
-          Search by Name:
-          <input
-            type="text"
-            value={filters.searchQuery}
-            onChange={(e) =>
-              setFilters({
-                ...filters,
-                searchQuery: e.target.value,
-              })
-            }
-          />
-        </label>
-        <label>
-          Min QOL Score:
-          <input
-            type="range"
-            value={filters.fQolScore}
-            onChange={(e) =>
-              setFilters({
-                ...filters,
-                fQolScore: Number(e.target.value),
-              })
-            }
-          />
-          <span>{filters.fQolScore}</span>
-        </label>
-        <label>
-          Min Walk Score:
-          <input
-            type="range"
-            value={filters.fWalkScore}
-            onChange={(e) =>
-              setFilters({
-                ...filters,
-                fWalkScore: Number(e.target.value),
-              })
-            }
-          />
-          <span>{filters.fWalkScore}</span>
-        </label>
-        <label>
-          Min Bus Stops Number:
-          <input
-            type="range"
-            value={filters.fBusStopsNumber}
-            onChange={(e) =>
-              setFilters({
-                ...filters,
-                fBusStopsNumber: Number(e.target.value),
-              })
-            }
-          />
-          <span>{filters.fBusStopsNumber}</span>
-        </label>
+    <div className="relative">
+      {/* Sidebar Filter Panel */}
+      <div className="w-80 p-4">
+        <RentalFilter filters={filters} setFilters={setFilters} />
       </div>
 
+      {/* Google Map */}
       <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={12}>
         {filteredLocations.map((loc, index) => (
           <Marker
@@ -161,9 +97,7 @@ function MapComponent() {
               fillOpacity: 1,
               strokeWeight: 1,
             }}
-            onClick={() => {
-              setSelected(loc);
-            }}
+            onClick={() => setSelected(loc)}
           />
         ))}
 
@@ -172,9 +106,9 @@ function MapComponent() {
             position={{ lat: selected.lat, lng: selected.long }}
             onCloseClick={() => setSelected({} as RentalScore)}
           >
-            <div className="rentalDetails">
-              <strong>{selected.name}</strong>
-              <ul className="p-0 list-none">
+            <div className="text-sm space-y-1">
+              <strong className="block text-base">{selected.name}</strong>
+              <ul className="list-none p-0">
                 <li>QOL Score: {selected.qolScore}</li>
                 <li>Walk Score: {selected.walkScore}</li>
                 <li>Transit Score: {selected.transitScore}</li>
@@ -191,6 +125,6 @@ function MapComponent() {
       </GoogleMap>
     </div>
   );
-}
+};
 
-export default MapComponent;
+export default Map;

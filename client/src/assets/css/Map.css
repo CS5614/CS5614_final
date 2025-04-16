@@ -1,5 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .rentalDetails {
-  color: black; /* Example styles */
-  font-size: 14px;
-  padding: 10px;
+    color: black;
+    /* Example styles */
+    font-size: 14px;
+    padding: 10px;
 }

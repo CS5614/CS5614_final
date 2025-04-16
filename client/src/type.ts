@@ -11,4 +11,5 @@ export interface RentalScore {
     metroStationNumber: number;
     openStreetNumber: number;
     reviewScore: number;
+    price: number;
 }
