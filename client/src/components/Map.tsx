@@ -99,6 +99,7 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
               <strong className="block text-base">{selected.name}</strong>
               <ul className="list-none p-0">
                 <li>QOL Score: {selected.qolScore}</li>
+                <li>Price: ${selected.price}</li>
                 <li>Walk Score: {selected.walkScore}</li>
                 <li>Transit Score: {selected.transitScore}</li>
                 <li>Bike Score: {selected.bikeScore}</li>
