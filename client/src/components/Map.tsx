@@ -35,6 +35,14 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
   const [filteredLocations, setFilteredLocations] = useState<RentalScore[]>([]);
   const [selected, setSelected] = useState<RentalScore>({} as RentalScore);
 
+  // Add a legend for QOL color indicators
+  const qolLegend = [
+    { color: "green", range: "80+" },
+    { color: "yellow", range: "60-79" },
+    { color: "orange", range: "40-59" },
+    { color: "red", range: "Below 40" },
+  ];
+
   useEffect(() => {
     const filtered = filterRentalLocations(rentalScores, filters);
     setFilteredLocations(filtered);
@@ -50,9 +58,10 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
       if (loc.busStopsNumber < filters.BusStopsNumber) return false;
       if (loc.price < filters.Price) return false;
       if (loc.airQualityScore < filters.AirQualityScore) return false;
-      if (loc.metroStationNumber < filters.BusStopsNumber) return false;
       if (loc.openStreetNumber < filters.ParkNumber) return false;
       if (loc.reviewScore < filters.Review) return false;
+      if (loc.bathroom < filters.Bathroom) return false;
+      if (loc.bedroom < filters.Bedroom) return false;
       if (
         filters.SearchQuery &&
         !loc.name.toLowerCase().includes(filters.SearchQuery.toLowerCase())
@@ -66,6 +75,29 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
 
   return (
     <div className="relative">
+      {/* QOL Legend */}
+      <div className="absolute top-4 left-4 bg-white p-4 rounded shadow-md z-10">
+        <h3 className="text-lg font-semibold mb-2 text-gray-900">QOL Legend</h3>
+        <ul>
+          {qolLegend.map((item, index) => (
+            <li key={index} className="flex items-center mb-1 text-gray-700">
+              <span
+                className={`inline-block w-4 h-4 mr-2 rounded ${
+                  item.color === "green"
+                    ? "bg-green-300"
+                    : item.color === "yellow"
+                    ? "bg-yellow-300"
+                    : item.color === "orange"
+                    ? "bg-orange-300"
+                    : "bg-red-300"
+                }`}
+              ></span>
+              <span>{item.range}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
       {/* Google Map */}
       <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={12}>
         {filteredLocations.map((loc, index) => (
@@ -105,16 +137,14 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
                 <span>{selected.qolScore}</span>
                 <span className="font-medium">Walk:</span>{" "}
                 <span>{selected.walkScore}</span>
-                <span className="font-medium">Transit:</span>{" "}
-                <span>{selected.transitScore}</span>
-                <span className="font-medium">Bike:</span>{" "}
-                <span>{selected.bikeScore}</span>
+                <span className="font-medium">Bathroom:</span>{" "}
+                <span>{selected.bathroom}</span>
+                <span className="font-medium">Bedroom:</span>{" "}
+                <span>{selected.bedroom}</span>
                 <span className="font-medium">Air Quality:</span>{" "}
                 <span>{selected.airQualityScore}</span>
                 <span className="font-medium">Bus Stops:</span>{" "}
                 <span>{selected.busStopsNumber}</span>
-                <span className="font-medium">Metro:</span>{" "}
-                <span>{selected.metroStationNumber}</span>
                 <span className="font-medium">Parks:</span>{" "}
                 <span>{selected.openStreetNumber}</span>
                 <span className="font-medium">Reviews:</span>{" "}

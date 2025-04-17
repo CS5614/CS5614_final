@@ -4,14 +4,13 @@ export interface RentalScore {
     name: string;
     qolScore: number;
     walkScore: number;
-    transitScore: number;
-    bikeScore: number;
     airQualityScore: number;
     busStopsNumber: number;
-    metroStationNumber: number;
     openStreetNumber: number;
     reviewScore: number;
     price: number;
+    bedroom: number;
+    bathroom: number;
 }
 
 export interface MapFilter {
@@ -22,5 +21,7 @@ export interface MapFilter {
     AirQualityScore: number;
     ParkNumber: number;
     Review: number;
+    Bedroom: number;
+    Bathroom: number;
     SearchQuery: string;
 }

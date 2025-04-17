@@ -13,6 +13,8 @@ function App() {
     BusStopsNumber: 0,
     ParkNumber: 0,
     Review: 0,
+    Bedroom: 0,
+    Bathroom: 0,
     SearchQuery: "",
   });
 

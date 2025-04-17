@@ -85,6 +85,40 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-600">
+            Bedroom
+          </label>
+          <input
+            title="Bedroom"
+            className="w-full"
+            type="range"
+            min="0"
+            max="100"
+            value={filters.Bedroom}
+            onChange={(e) =>
+              setFilters({ ...filters, Bedroom: Number(e.target.value) })
+            }
+          />
+          <div className="text-sm text-gray-500">{filters.Bedroom}</div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-600">
+            Bathroom
+          </label>
+          <input
+            title="Bathroom"
+            className="w-full"
+            type="range"
+            min="0"
+            max="100"
+            value={filters.Bathroom}
+            onChange={(e) =>
+              setFilters({ ...filters, Bathroom: Number(e.target.value) })
+            }
+          />
+          <div className="text-sm text-gray-500">{filters.Bathroom}</div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-600">
             Google Review
           </label>
           <input
