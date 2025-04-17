@@ -107,7 +107,14 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
             icon={{
               path: google.maps.SymbolPath.CIRCLE,
               scale: 15, // Adjust scale to keep the oval size appropriate
-              fillColor: getColorByQOL(loc.qolScore),
+              fillColor:
+                loc.qolScore >= 80
+                  ? "#86efac" // Tailwind green-300
+                  : loc.qolScore >= 60
+                  ? "#fde047" // Tailwind yellow-300
+                  : loc.qolScore >= 40
+                  ? "#fdba74" // Tailwind orange-300
+                  : "#fca5a5", // Tailwind red-300
               fillOpacity: 1,
               strokeWeight: 1,
             }}
