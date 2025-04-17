@@ -95,20 +95,31 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
             position={{ lat: selected.lat, lng: selected.long }}
             onCloseClick={() => setSelected({} as RentalScore)}
           >
-            <div className="text-sm space-y-1 text-gray-700">
-              <strong className="block text-base">{selected.name}</strong>
-              <ul className="list-none p-0">
-                <li>QOL Score: {selected.qolScore}</li>
-                <li>Price: ${selected.price}</li>
-                <li>Walk Score: {selected.walkScore}</li>
-                <li>Transit Score: {selected.transitScore}</li>
-                <li>Bike Score: {selected.bikeScore}</li>
-                <li>Air Quality: {selected.airQualityScore}</li>
-                <li>Bus Stops: {selected.busStopsNumber}</li>
-                <li>Metro Stations: {selected.metroStationNumber}</li>
-                <li>Parks Nearby: {selected.openStreetNumber}</li>
-                <li>Review Score: {selected.reviewScore}</li>
-              </ul>
+            <div className="w-72 p-4 text-base text-gray-800 font-sans">
+              <h2 className="text-lg font-semibold mb-2">{selected.name}</h2>
+              <p className="text-gray-600 mb-3 font-medium">
+                ${selected.price}/mo
+              </p>
+              <div className="grid grid-cols-2 gap-y-2 text-sm text-gray-700">
+                <span className="font-medium">QOL:</span>{" "}
+                <span>{selected.qolScore}</span>
+                <span className="font-medium">Walk:</span>{" "}
+                <span>{selected.walkScore}</span>
+                <span className="font-medium">Transit:</span>{" "}
+                <span>{selected.transitScore}</span>
+                <span className="font-medium">Bike:</span>{" "}
+                <span>{selected.bikeScore}</span>
+                <span className="font-medium">Air Quality:</span>{" "}
+                <span>{selected.airQualityScore}</span>
+                <span className="font-medium">Bus Stops:</span>{" "}
+                <span>{selected.busStopsNumber}</span>
+                <span className="font-medium">Metro:</span>{" "}
+                <span>{selected.metroStationNumber}</span>
+                <span className="font-medium">Parks:</span>{" "}
+                <span>{selected.openStreetNumber}</span>
+                <span className="font-medium">Reviews:</span>{" "}
+                <span>{selected.reviewScore}</span>
+              </div>
             </div>
           </InfoWindow>
         )}

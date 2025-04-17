@@ -33,7 +33,7 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
             title="Price Range"
             className="w-full"
             type="range"
-            min="1500"
+            min="0"
             max="4000"
             value={filters.Price}
             onChange={(e) =>
@@ -41,7 +41,8 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
             }
           />
           <div className="flex justify-between text-sm text-gray-500">
-            <span>$1,500</span>
+            <span>$0</span>
+            <span>${filters.Price}</span>
             <span>$4,000</span>
           </div>
         </div>
@@ -50,8 +51,11 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
             Air Quality Index
           </label>
           <input
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            type="text"
+            title="Air Quality Index"
+            className="w-full"
+            type="range"
+            min="0"
+            max="100"
             value={filters.AirQualityScore}
             onChange={(e) =>
               setFilters({
@@ -59,8 +63,8 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
                 AirQualityScore: Number(e.target.value),
               })
             }
-            placeholder="Search"
           />
+          <div className="text-sm text-gray-500">{filters.AirQualityScore}</div>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-600">
