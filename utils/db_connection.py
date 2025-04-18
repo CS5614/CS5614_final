@@ -13,6 +13,7 @@ class DatabaseConnection:
         self.db_name = os.getenv("DB_NAME")
         self.db_user = os.getenv("DB_USER")
         self.db_password = os.getenv("DB_PASSWORD")
+        self.db_port = os.getenv("DB_PORT", "5432")
         self.__connection = None
 
         if not all([self.db_host, self.db_name, self.db_user, self.db_password]):
@@ -25,7 +26,9 @@ class DatabaseConnection:
                 host=self.db_host,
                 database=self.db_name,
                 user=self.db_user,
-                password=self.db_password
+                password=self.db_password,
+                port=self.db_port
+
             )
             return self.__connection
 
