@@ -19,7 +19,6 @@ const center = {
   lng: -77.0369,
 };
 
-
 const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: config.googleMapsApiKey,
@@ -50,7 +49,7 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
       if (loc.qolScore < filters.QolScore) return false;
       if (loc.walkScore < filters.WalkScore) return false;
       if (loc.busStopsNumber < filters.BusStopsNumber) return false;
-      if (loc.price < filters.Price) return false;
+      if (loc.price > filters.Price) return false;
       if (loc.airQualityScore < filters.AirQualityScore) return false;
       if (loc.openStreetNumber < filters.ParkNumber) return false;
       if (loc.reviewScore < filters.Review) return false;

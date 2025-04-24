@@ -29,7 +29,7 @@ export interface MapFilter {
 export const defaultFilters: MapFilter = {
     QolScore: 0,
     WalkScore: 0,
-    Price: 0,
+    Price: 4000,
     AirQualityScore: 0,
     BusStopsNumber: 0,
     ParkNumber: 0,

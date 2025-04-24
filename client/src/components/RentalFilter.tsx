@@ -31,10 +31,10 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-600">
-            Price Range
+            Max Price
           </label>
           <input
-            title="Price Range"
+            title="Max Price"
             className="w-full"
             type="range"
             min="0"
