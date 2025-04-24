@@ -2,24 +2,13 @@ import Map from "./components/Map";
 import RentalFilter from "./components/RentalFilter";
 import { useState } from "react";
 import "./App.css";
-import { MapFilter } from "./type";
+import { defaultFilters, MapFilter } from "./type";
 
 function App() {
-  const [filters, setFilters] = useState<MapFilter>({
-    QolScore: 0,
-    WalkScore: 0,
-    Price: 0,
-    AirQualityScore: 0,
-    BusStopsNumber: 0,
-    ParkNumber: 0,
-    Review: 0,
-    Bedroom: 0,
-    Bathroom: 0,
-    SearchQuery: "",
-  });
+  const [filters, setFilters] = useState<MapFilter>(defaultFilters);
 
   return (
-    <div className="h-screen w-screen bg-gray-100 flex">
+    <div className="flex h-screen w-screen bg-gray-100">
       <div className="w-80 bg-white shadow-lg">
         <RentalFilter filters={filters} setFilters={setFilters} />
       </div>

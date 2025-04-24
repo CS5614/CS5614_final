@@ -1,5 +1,5 @@
 import React from "react";
-import { MapFilter } from "../type";
+import { defaultFilters, MapFilter } from "../type";
 
 interface Props {
   filters: MapFilter;
@@ -7,6 +7,10 @@ interface Props {
 }
 
 const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
+  // Define default filter values (adjust as needed)
+  const handleReset = () => {
+    setFilters(defaultFilters);
+  };
   return (
     <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
       <h3 className="text-lg font-bold text-gray-800">Filters</h3>
@@ -135,6 +139,13 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
           <div className="text-sm text-gray-500">{filters.Review}</div>
         </div>
       </div>
+      <button
+        className="mt-4 px-4 py-2 bg-red-500 hover:bg-red-300 rounded text-black-700 font-semibold"
+        onClick={handleReset}
+        type="button"
+      >
+        Reset Filters
+      </button>
     </div>
   );
 };

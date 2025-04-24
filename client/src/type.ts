@@ -25,3 +25,16 @@ export interface MapFilter {
     Bathroom: number;
     SearchQuery: string;
 }
+
+export const defaultFilters: MapFilter = {
+    QolScore: 0,
+    WalkScore: 0,
+    Price: 0,
+    AirQualityScore: 0,
+    BusStopsNumber: 0,
+    ParkNumber: 0,
+    Review: 0,
+    Bedroom: 0,
+    Bathroom: 0,
+    SearchQuery: "",
+};
