@@ -151,9 +151,9 @@ def main():
     logging.info("Initial pause finished. Starting fetch process...")
     results = fetch_air_quality()
     if results:
-        with open("air_quality_results.json", "w") as f:
+        with open("../raw_data/air_quality_results_old.json", "w") as f:
             json.dump(results, f, indent=4)
-        logging.info("Results saved to air_quality_results.json")
+        logging.info("Results saved to air_quality_results_old.json")
 
 if __name__ == "__main__":
     main()
