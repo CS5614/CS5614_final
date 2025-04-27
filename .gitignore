@@ -175,9 +175,9 @@ cython_debug/
 .pypirc
 
 .idea
-.python-version
-pyproject.toml
-uv.lock
+# .python-version
+# pyproject.toml
+# uv.lock
 *.ipynb_checkpoints
 *.DS_Store
 
