@@ -42,7 +42,7 @@ RUN apt-get update && \
 ENV GDAL_CONFIG=/usr/bin/gdal-config
 
 COPY ./server .
-COPY --from=frontend-builder /app/dist ./app/dist
+COPY --from=frontend-builder /app/dist ./dist
 
 RUN uv sync --frozen --no-cache
 #replace
