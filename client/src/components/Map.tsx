@@ -19,13 +19,6 @@ const center = {
   lng: -77.0369,
 };
 
-const getColorByQOL = (score: number) => {
-  if (score >= 80) return "green";
-  if (score >= 60) return "yellow";
-  if (score >= 40) return "orange";
-  return "red";
-};
-
 const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: config.googleMapsApiKey,

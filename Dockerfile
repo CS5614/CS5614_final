@@ -1,27 +1,36 @@
-# # Frontend pnpm build
-# FROM node:18-alpine AS frontend-builder
+# Accept GOOGLE_MAPS_API_KEY as a build argument
+ARG GOOGLE_MAPS_API_KEY
+ARG DB_NAME
+ARG DB_USER
+ARG DB_PASSWORD
+ARG DB_HOST
 
-# RUN corepack enable
+# Frontend pnpm build
+FROM node:22-alpine AS frontend-builder
 
-# WORKDIR /app/client
+RUN corepack enable \
+    && corepack prepare pnpm@latest --activate
 
-# COPY client/package.json client/pnpm-lock.yaml ./
-# RUN pnpm install --frozen-lockfile
+WORKDIR /app
 
-# COPY client/ ./
+COPY client/package.json client/pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
-# RUN mv src/config/index.ts.example src/config/index.ts
+COPY client/ ./
 
-# RUN pnpm run build
+RUN mv src/config/index.ts.example src/config/index.ts
 
-
+RUN sed -i "s/YOUR_GOOGLE_MAPS_API_KEY/${GOOGLE_MAPS_API_KEY}/" src/config/index.ts
+RUN pnpm run build
 
 # Python FastAPI server
 FROM python:3.12-slim
 
-WORKDIR /app
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Install GDAL & build tools
+WORKDIR /app
+ENV PYTHONPATH=/app
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
@@ -30,21 +39,14 @@ RUN apt-get update && \
     libgdal-dev && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=ghcr.io/astral-sh/uv:0.4.9 /uv /usr/local/bin/uv
-RUN chmod +x /usr/local/bin/uv
-
-COPY pyproject.toml ./
-
 ENV GDAL_CONFIG=/usr/bin/gdal-config
-RUN uv venv \
-    && uv pip install .
 
-COPY server ./server
-COPY utils  ./utils
-COPY client ./client
-# COPY --from=frontend-builder /app/dist ./client
+COPY ./server .
+COPY --from=frontend-builder /app/dist ./app/dist
+
+RUN uv sync --frozen --no-cache
 
 ENV PYTHONPATH=/app
 
 ENTRYPOINT ["uv"]
-CMD ["run", "uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["run", "fastapi", "run"]

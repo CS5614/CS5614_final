@@ -2,7 +2,7 @@ import os
 import decimal
 from typing import List, Dict
 from psycopg2.extras import RealDictCursor
-from utils.db_connection import DatabaseConnection
+from .db_connection import DatabaseConnection
 
 
 class QualityOfLifeConverter:
