@@ -29,7 +29,7 @@ uv run import.py
 ## run the server and client
 
 
-### Use docker(recommanded)
+### Use docker(recommended)
 ```bash
 
 docker build -t cs5614_final .
