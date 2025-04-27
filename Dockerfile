@@ -45,6 +45,12 @@ COPY ./server .
 COPY --from=frontend-builder /app/dist ./app/dist
 
 RUN uv sync --frozen --no-cache
+#replace
+RUN mv .env.example .env
+RUN sed -i "s/YOUR_DB_NAME/${DB_NAME}/" .env
+RUN sed -i "s/YOUR_DB_USER/${DB_USER}/" .env
+RUN sed -i "s/YOUR_DB_PASSWORD/${DB_PASSWORD}/" .env
+RUN sed -i "s/YOUR_DB_HOST/${DB_HOST}/" .env
 
 ENV PYTHONPATH=/app
 
