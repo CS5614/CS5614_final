@@ -31,19 +31,9 @@ def create_app() -> FastAPI:
             allow_headers=["*"],
         )
     else:
-        dist_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), ".", "dist"
-        )
-
-        app.mount("/", StaticFiles(directory=dist_path, html=True), name="client")
+        app.mount("/", StaticFiles(directory="dist", html=True), name="client")
 
     return app
 
 
 app = create_app()
-
-
-# if __name__ == "__main__":
-#     import uvicorn
-
-#     uvicorn.run("server.app:app", host="0.0.0.0", port=8000, reload=IS_DEV)
