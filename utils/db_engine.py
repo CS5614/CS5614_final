@@ -12,7 +12,7 @@ class DBEngine:
         self.db_name = os.getenv("DB_NAME")
         self.db_user = os.getenv("DB_USER")
         self.db_password = os.getenv("DB_PASSWORD")
-        self.db_port = os.getenv("DB_PORT", "5432")
+        self.db_port = os.getenv("DB_PORT", 5432)
 
         if not all([self.db_host, self.db_name, self.db_user, self.db_password, self.db_port]):
             logging.INFO("Database connection parameters are not set in the environment variables.")

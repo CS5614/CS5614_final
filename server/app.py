@@ -13,7 +13,7 @@ def create_app() -> FastAPI:
     app = FastAPI(title="Rental Score API", version="0.0.1")
 
     # Include routers
-    from routes.rental_score import router as rental_score_router
+    from server.routes.rental_score import router as rental_score_router
     app.include_router(rental_score_router)
 
     # Mount static files for the frontend

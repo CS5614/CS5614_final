@@ -5,8 +5,6 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../utils')))
 from utils.convert_qol import QualityOfLifeConverter
-from utils.db_engine import DBEngine
-import orjson
 
 router = APIRouter(prefix="/api/rentalScore", tags=["rentalScore"])
 

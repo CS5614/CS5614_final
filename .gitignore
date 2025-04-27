@@ -185,3 +185,5 @@ uv.lock
 .github/copilot-instructions.md
 
 /node_modules
+
+prod.env
