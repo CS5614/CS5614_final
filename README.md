@@ -32,7 +32,7 @@ uv run import.py
 ### Use docker(recommanded)
 ```bash
 
-dockr build -t cs5614_final .
+docker build -t cs5614_final .
 
 docker run -p 8000:8000 \
   -e GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_API_KEY \
