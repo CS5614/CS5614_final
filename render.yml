@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: cs5614 # <-- change this to your Render service name
+    env: docker
+    region: virginia # or virginia depending on your choice
+    plan: free # or starter, depending on your need
+    dockerfilePath: ./Dockerfile
+    build:
+      buildArgs:
+        GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
+        DB_NAME: ${DB_NAME}
+        DB_USER: ${DB_USER}
+        DB_PASSWORD: ${DB_PASSWORD}
+        DB_HOST: ${DB_HOST}
+    envVars:
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_HOST
+        sync: false

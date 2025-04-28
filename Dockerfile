@@ -1,12 +1,16 @@
-# Accept GOOGLE_MAPS_API_KEY as a build argument
+# Accept environment variables as build arguments
 ARG GOOGLE_MAPS_API_KEY
 ARG DB_NAME
 ARG DB_USER
 ARG DB_PASSWORD
 ARG DB_HOST
+ARG GOOGLE_MAPS_API_KEY
 
 # Frontend pnpm build
 FROM node:22-alpine AS frontend-builder
+
+# Use ARG to pass the Google Maps API key
+ENV GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
 
 RUN corepack enable \
     && corepack prepare pnpm@latest --activate
@@ -21,10 +25,18 @@ COPY client/ ./
 RUN mv src/config/index.ts.example src/config/index.ts
 
 RUN sed -i "s/YOUR_GOOGLE_MAPS_API_KEY/${GOOGLE_MAPS_API_KEY}/" src/config/index.ts
+
+RUN CAT src/config/index.ts
 RUN pnpm run build
 
 # Python FastAPI server
 FROM python:3.12-slim
+
+# Set environment variables from ARG
+ENV DB_NAME=${DB_NAME}
+ENV DB_USER=${DB_USER}
+ENV DB_PASSWORD=${DB_PASSWORD}
+ENV DB_HOST=${DB_HOST}
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
@@ -45,13 +57,14 @@ COPY ./server .
 COPY --from=frontend-builder /app/dist ./dist
 
 RUN uv sync --frozen --no-cache
-#replace
+# Replace placeholders in .env with environment variables
 RUN mv .env.example .env
 RUN sed -i "s/YOUR_DB_NAME/${DB_NAME}/" .env
 RUN sed -i "s/YOUR_DB_USER/${DB_USER}/" .env
 RUN sed -i "s/YOUR_DB_PASSWORD/${DB_PASSWORD}/" .env
 RUN sed -i "s/YOUR_DB_HOST/${DB_HOST}/" .env
 
+RUN CAT .env
 ENV PYTHONPATH=/app
 
 ENTRYPOINT ["uv"]
