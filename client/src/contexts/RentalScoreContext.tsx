@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, ReactNode } from "react";
 import { RentalScore } from "../type";
+import axios from "axios";
 
 export const RentalScoreContext = createContext<RentalScore[]>([]);
 
@@ -11,8 +12,8 @@ export const RentalScoreProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const fetchRentalScores = async () => {
       try {
-        const response = await fetch("http://0.0.0.0:8000/api/rentalScore");
-        const data = await response.json();
+        const response = await axios.get("http://0.0.0.0:8000/api/rentalScore");
+        const data = response.data;
         const rentalScores = data as RentalScore[];
         // console.log(
         //   rentalScores.filter(
