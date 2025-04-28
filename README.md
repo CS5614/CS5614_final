@@ -26,7 +26,7 @@ uv run import.py
 
 
 
-## run the server and client
+## Run the server and client
 
 
 ### Use docker(recommended)
@@ -56,12 +56,19 @@ pnpm install
 pnpm run dev
 ```
 
-### backend
+#### backend
 
-```bach
+```bash
 cd server
 
 uv sync
 
 uv run fastapi dev
 ```
+
+## Run Jupyter Notebooks
+```bash
+cd data_analysis
+source .venv/bin/activate
+```
+Then run the jupyter notebook
