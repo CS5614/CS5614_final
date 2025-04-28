@@ -1,5 +1,6 @@
 import React from "react";
 import { MapFilter } from "../type";
+import { defaultFilters } from "../App";
 
 interface Props {
   filters: MapFilter;
@@ -25,16 +26,89 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
             placeholder="Search"
           />
         </div>
+        <div className="text-gray-600">
+          <label className="block text-sm font-medium">State</label>
+          <div className="flex space-x-4 mt-2 justify-center">
+            <label>
+              <input
+                type="checkbox"
+                name="state"
+                value="DC"
+                checked={filters.State.includes("DC")}
+                onChange={() =>
+                  setFilters({
+                    ...filters,
+                    State: filters.State.includes("DC")
+                      ? filters.State.filter((state) => state !== "DC")
+                      : [...filters.State, "DC"],
+                  })
+                }
+              />
+              DC
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                name="state"
+                value="VA"
+                checked={filters.State.includes("VA")}
+                onChange={() =>
+                  setFilters({
+                    ...filters,
+                    State: filters.State.includes("VA")
+                      ? filters.State.filter((state) => state !== "VA")
+                      : [...filters.State, "VA"],
+                  })
+                }
+              />
+              VA
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                name="state"
+                value="MD"
+                checked={filters.State.includes("MD")}
+                onChange={() =>
+                  setFilters({
+                    ...filters,
+                    State: filters.State.includes("MD")
+                      ? filters.State.filter((state) => state !== "MD")
+                      : [...filters.State, "MD"],
+                  })
+                }
+              />
+              MD
+            </label>
+          </div>
+        </div>
         <div>
           <label className="block text-sm font-medium text-gray-600">
-            Price Range
+            Qol Score
           </label>
           <input
-            title="Price Range"
+            title="Qol Score"
             className="w-full"
             type="range"
             min="0"
-            max="4000"
+            max="100"
+            value={filters.QolScore}
+            onChange={(e) =>
+              setFilters({ ...filters, QolScore: Number(e.target.value) })
+            }
+          />
+          <div className="text-sm text-gray-500">{filters.QolScore}</div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-600">
+            Max Price
+          </label>
+          <input
+            title="Max Price"
+            className="w-full"
+            type="range"
+            min="0"
+            max="12000"
             value={filters.Price}
             onChange={(e) =>
               setFilters({ ...filters, Price: Number(e.target.value) })
@@ -43,8 +117,42 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
           <div className="flex justify-between text-sm text-gray-500">
             <span>$0</span>
             <span>${filters.Price}</span>
-            <span>$4,000</span>
+            <span>$12,000</span>
           </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-600">
+            Bedroom
+          </label>
+          <input
+            title="Bedroom"
+            className="w-full"
+            type="range"
+            min="1"
+            max="5"
+            value={filters.Bedroom}
+            onChange={(e) =>
+              setFilters({ ...filters, Bedroom: Number(e.target.value) })
+            }
+          />
+          <div className="text-sm text-gray-500">{filters.Bedroom}</div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-600">
+            Bathroom
+          </label>
+          <input
+            title="Bathroom"
+            className="w-full"
+            type="range"
+            min="1"
+            max="5"
+            value={filters.Bathroom}
+            onChange={(e) =>
+              setFilters({ ...filters, Bathroom: Number(e.target.value) })
+            }
+          />
+          <div className="text-sm text-gray-500">{filters.Bathroom}</div>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-600">
@@ -83,40 +191,7 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
           />
           <div className="text-sm text-gray-500">{filters.WalkScore}</div>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-600">
-            Bedroom
-          </label>
-          <input
-            title="Bedroom"
-            className="w-full"
-            type="range"
-            min="0"
-            max="100"
-            value={filters.Bedroom}
-            onChange={(e) =>
-              setFilters({ ...filters, Bedroom: Number(e.target.value) })
-            }
-          />
-          <div className="text-sm text-gray-500">{filters.Bedroom}</div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-600">
-            Bathroom
-          </label>
-          <input
-            title="Bathroom"
-            className="w-full"
-            type="range"
-            min="0"
-            max="100"
-            value={filters.Bathroom}
-            onChange={(e) =>
-              setFilters({ ...filters, Bathroom: Number(e.target.value) })
-            }
-          />
-          <div className="text-sm text-gray-500">{filters.Bathroom}</div>
-        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-600">
             Google Review
@@ -133,6 +208,9 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
             }
           />
           <div className="text-sm text-gray-500">{filters.Review}</div>
+        </div>
+        <div>
+          <button onClick={() => setFilters(defaultFilters)}>Reset</button>
         </div>
       </div>
     </div>

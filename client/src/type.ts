@@ -11,6 +11,7 @@ export interface RentalScore {
     price: number;
     bedroom: number;
     bathroom: number;
+    state: string;
 }
 
 export interface MapFilter {
@@ -24,4 +25,5 @@ export interface MapFilter {
     Bedroom: number;
     Bathroom: number;
     SearchQuery: string;
+    State: string[];
 }
