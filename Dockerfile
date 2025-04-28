@@ -4,7 +4,6 @@ ARG DB_NAME
 ARG DB_USER
 ARG DB_PASSWORD
 ARG DB_HOST
-ARG GOOGLE_MAPS_API_KEY
 
 # Frontend pnpm build
 FROM node:22-alpine AS frontend-builder
@@ -26,7 +25,7 @@ RUN mv src/config/index.ts.example src/config/index.ts
 
 RUN sed -i "s/YOUR_GOOGLE_MAPS_API_KEY/${GOOGLE_MAPS_API_KEY}/" src/config/index.ts
 
-RUN CAT src/config/index.ts
+RUN cat src/config/index.ts
 RUN pnpm run build
 
 # Python FastAPI server
@@ -64,7 +63,7 @@ RUN sed -i "s/YOUR_DB_USER/${DB_USER}/" .env
 RUN sed -i "s/YOUR_DB_PASSWORD/${DB_PASSWORD}/" .env
 RUN sed -i "s/YOUR_DB_HOST/${DB_HOST}/" .env
 
-RUN CAT .env
+RUN cat .env
 ENV PYTHONPATH=/app
 
 ENTRYPOINT ["uv"]
