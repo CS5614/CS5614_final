@@ -37,6 +37,7 @@ def create_app() -> FastAPI:
                 "http://localhost:8000",
                 "http://0.0.0.0:8000",
                 "http://127.0.0.1:8000",
+                "https://cs5614-final.onrender.com",
             ],  # Add allowed origins
             allow_credentials=True,
             allow_methods=["*"],
