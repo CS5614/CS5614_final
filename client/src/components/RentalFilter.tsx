@@ -12,6 +12,20 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
     <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
       <h3 className="text-lg font-bold text-gray-800">Filters</h3>
       <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-600">
+            Enter address or building name
+          </label>
+          <input
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            type="text"
+            value={filters.SearchQuery}
+            onChange={(e) =>
+              setFilters({ ...filters, SearchQuery: e.target.value })
+            }
+            placeholder="Search"
+          />
+        </div>
         <div className="text-gray-600">
           <label className="block text-sm font-medium">State</label>
           <div className="flex space-x-4 mt-2 justify-center">
@@ -67,18 +81,6 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
               MD
             </label>
           </div>
-          <label className="block text-sm font-medium text-gray-600">
-            Enter address or building name
-          </label>
-          <input
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            type="text"
-            value={filters.SearchQuery}
-            onChange={(e) =>
-              setFilters({ ...filters, SearchQuery: e.target.value })
-            }
-            placeholder="Search"
-          />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-600">

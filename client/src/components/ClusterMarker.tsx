@@ -81,7 +81,14 @@ export const ClusteredMarker: React.FC<ClusterMarkerProps> = ({
             onClick={() => setSelected(location)}
             label={{
               text: location.price.toString(),
-              color: "black",
+              color:
+                location.qolScore >= 80
+                  ? "#86efac" // Tailwind green-300
+                  : location.qolScore >= 60
+                  ? "#fde047" // Tailwind yellow-300
+                  : location.qolScore >= 40
+                  ? "#fdba74" // Tailwind orange-300
+                  : "#fca5a5", // Tailwind red-300
               fontSize: "12px",
               fontWeight: "bold",
             }}
