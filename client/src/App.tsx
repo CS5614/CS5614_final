@@ -3,8 +3,9 @@ import RentalFilter from "./components/RentalFilter";
 import { useState } from "react";
 import "./App.css";
 import { MapFilter } from "./type";
+import { RentalScoreProvider } from "./contexts/RentalScoreContext";
 
-function App() {
+const App: React.FC = () => {
   const [filters, setFilters] = useState<MapFilter>({
     QolScore: 0,
     WalkScore: 0,
@@ -24,10 +25,12 @@ function App() {
         <RentalFilter filters={filters} setFilters={setFilters} />
       </div>
       <div className="flex-1">
-        <Map filters={filters} />
+        <RentalScoreProvider>
+          <Map filters={filters} />
+        </RentalScoreProvider>
       </div>
     </div>
   );
-}
+};
 
 export default App;

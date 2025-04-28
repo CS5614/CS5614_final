@@ -31,6 +31,17 @@ def create_app() -> FastAPI:
             allow_headers=["*"],
         )
     else:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=[
+                "http://localhost:8000",
+                "http://0.0.0.0:8000",
+                "http://127.0.0.1:8000",
+            ],  # Add allowed origins
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
         app.mount("/", StaticFiles(directory="dist", html=True), name="client")
 
     return app

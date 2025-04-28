@@ -4,6 +4,7 @@ import {
   Marker,
   InfoWindow,
   useJsApiLoader,
+  MarkerClusterer,
 } from "@react-google-maps/api";
 import { RentalScoreContext } from "../contexts/RentalScoreContext";
 import { config } from "../config/index";
@@ -23,7 +24,6 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: config.googleMapsApiKey,
   });
-
   const rentalScores = useContext(RentalScoreContext);
   const [filteredLocations, setFilteredLocations] = useState<RentalScore[]>([]);
   const [selected, setSelected] = useState<RentalScore>({} as RentalScore);
@@ -94,32 +94,36 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
       {/* Google Map */}
       <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={12}>
         {filteredLocations.map((loc, index) => (
-          <Marker
-            key={index}
-            position={{ lat: loc.lat, lng: loc.long }}
-            icon={{
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 15, // Adjust scale to keep the oval size appropriate
-              fillColor:
-                loc.qolScore >= 80
-                  ? "#86efac" // Tailwind green-300
-                  : loc.qolScore >= 60
-                  ? "#fde047" // Tailwind yellow-300
-                  : loc.qolScore >= 40
-                  ? "#fdba74" // Tailwind orange-300
-                  : "#fca5a5", // Tailwind red-300
-              fillOpacity: 1,
-              strokeWeight: 1,
-            }}
-            onClick={() => setSelected(loc)}
-            label={{
-              text: loc.price.toString(),
-              color: "black",
-              fontSize: "12px",
-              fontWeight: "bold",
-              className: "text-center", // Ensures text is centered
-            }}
-          />
+          <MarkerClusterer key={index}>
+            {(clusterer) => (
+              <Marker
+                position={{ lat: loc.lat, lng: loc.long }}
+                clusterer={clusterer}
+                icon={{
+                  path: google.maps.SymbolPath.CIRCLE,
+                  scale: 15, // Adjust scale to keep the oval size appropriate
+                  fillColor:
+                    loc.qolScore >= 80
+                      ? "#86efac" // Tailwind green-300
+                      : loc.qolScore >= 60
+                      ? "#fde047" // Tailwind yellow-300
+                      : loc.qolScore >= 40
+                      ? "#fdba74" // Tailwind orange-300
+                      : "#fca5a5", // Tailwind red-300
+                  fillOpacity: 1,
+                  strokeWeight: 1,
+                }}
+                onClick={() => setSelected(loc)}
+                label={{
+                  text: loc.price.toString(),
+                  color: "black",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  className: "text-center", // Ensures text is centered
+                }}
+              />
+            )}
+          </MarkerClusterer>
         ))}
 
         {selected.lat !== undefined && selected.long !== undefined && (
