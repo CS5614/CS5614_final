@@ -15,13 +15,6 @@ ENV DB_USER=${DB_USER}
 ENV DB_PASSWORD=${DB_PASSWORD}
 ENV DB_HOST=${DB_HOST}
 
-# Log the values of the ENV variables
-RUN echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}" && \
-    echo "DB_NAME=${DB_NAME}" && \
-    echo "DB_USER=${DB_USER}" && \
-    echo "DB_PASSWORD=${DB_PASSWORD}" && \
-    echo "DB_HOST=${DB_HOST}"
-
 RUN corepack enable \
     && corepack prepare pnpm@latest --activate
 
@@ -55,12 +48,6 @@ ENV DB_NAME=${DB_NAME}
 ENV DB_USER=${DB_USER}
 ENV DB_PASSWORD=${DB_PASSWORD}
 ENV DB_HOST=${DB_HOST}
-
-RUN echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}" && \
-    echo "DB_NAME=${DB_NAME}" && \
-    echo "DB_USER=${DB_USER}" && \
-    echo "DB_PASSWORD=${DB_PASSWORD}" && \
-    echo "DB_HOST=${DB_HOST}"
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
