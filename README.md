@@ -32,15 +32,15 @@ uv run import.py
 ### Use docker(recommended)
 ```bash
 
-docker build -t cs5614_final .
+docker build \
+  --build-arg GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_API_KEY \
+  --build-arg DB_NAME=YOUR_POSTGRESQL_DB_NAME \
+  --build-arg DB_USER=YOUR_DB_USER_NAME \
+  --build-arg DB_PASSWORD=YOUR_DB_PASSWORD \
+  --build-arg DB_HOST=YOUR_DB_HOST \
+  -t cs5614_final .
 
-docker run -p 8000:8000 \
-  -e GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_API_KEY \
-  -e DB_NAME=YOUR_POSTGRESQL_DB_NAME \
-  -e DB_USER=YOUR_DB_USER_NAME \
-  -e DB_PASSWORD=YOUR_DB_PASSWORD \
-  -e DB_HOST=YOUR_DB_HOST \
-  cs5614
+docker run -p 8000:8000 cs5614_final
 ```
 
 ### Use cmd

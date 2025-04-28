@@ -1,3 +1,6 @@
+# Frontend pnpm build
+FROM node:22-alpine AS frontend-builder
+
 # Accept environment variables as build arguments
 ARG GOOGLE_MAPS_API_KEY
 ARG DB_NAME
@@ -5,11 +8,19 @@ ARG DB_USER
 ARG DB_PASSWORD
 ARG DB_HOST
 
-# Frontend pnpm build
-FROM node:22-alpine AS frontend-builder
-
-# Use ARG to pass the Google Maps API key
+# Set environment variables from ARG
 ENV GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+ENV DB_NAME=${DB_NAME}
+ENV DB_USER=${DB_USER}
+ENV DB_PASSWORD=${DB_PASSWORD}
+ENV DB_HOST=${DB_HOST}
+
+# Log the values of the ENV variables
+RUN echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}" && \
+    echo "DB_NAME=${DB_NAME}" && \
+    echo "DB_USER=${DB_USER}" && \
+    echo "DB_PASSWORD=${DB_PASSWORD}" && \
+    echo "DB_HOST=${DB_HOST}"
 
 RUN corepack enable \
     && corepack prepare pnpm@latest --activate
@@ -31,11 +42,25 @@ RUN pnpm run build
 # Python FastAPI server
 FROM python:3.12-slim
 
+# Accept environment variables as build arguments
+ARG GOOGLE_MAPS_API_KEY
+ARG DB_NAME
+ARG DB_USER
+ARG DB_PASSWORD
+ARG DB_HOST
+
 # Set environment variables from ARG
+ENV GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
 ENV DB_NAME=${DB_NAME}
 ENV DB_USER=${DB_USER}
 ENV DB_PASSWORD=${DB_PASSWORD}
 ENV DB_HOST=${DB_HOST}
+
+RUN echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}" && \
+    echo "DB_NAME=${DB_NAME}" && \
+    echo "DB_USER=${DB_USER}" && \
+    echo "DB_PASSWORD=${DB_PASSWORD}" && \
+    echo "DB_HOST=${DB_HOST}"
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
