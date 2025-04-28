@@ -4,20 +4,24 @@ import { useState } from "react";
 import "./App.css";
 import { MapFilter } from "./type";
 import { RentalScoreProvider } from "./contexts/RentalScoreContext";
+import { APIProvider } from "@vis.gl/react-google-maps";
+import { config } from "./config";
 
+export const defaultFilters: MapFilter = {
+  QolScore: 50,
+  WalkScore: 0,
+  Price: 3000,
+  AirQualityScore: 0,
+  BusStopsNumber: 0,
+  ParkNumber: 0,
+  Review: 0,
+  Bedroom: 2,
+  Bathroom: 2,
+  SearchQuery: "",
+  State: ["VA"],
+};
 const App: React.FC = () => {
-  const [filters, setFilters] = useState<MapFilter>({
-    QolScore: 0,
-    WalkScore: 0,
-    Price: 0,
-    AirQualityScore: 0,
-    BusStopsNumber: 0,
-    ParkNumber: 0,
-    Review: 0,
-    Bedroom: 0,
-    Bathroom: 0,
-    SearchQuery: "",
-  });
+  const [filters, setFilters] = useState<MapFilter>(defaultFilters);
 
   return (
     <div className="h-screen w-screen bg-gray-100 flex">
@@ -26,7 +30,9 @@ const App: React.FC = () => {
       </div>
       <div className="flex-1">
         <RentalScoreProvider>
-          <Map filters={filters} />
+          <APIProvider apiKey={config.googleMapsApiKey}>
+            <Map filters={filters} />
+          </APIProvider>
         </RentalScoreProvider>
       </div>
     </div>

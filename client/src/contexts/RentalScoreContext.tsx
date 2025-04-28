@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, ReactNode } from "react";
 import { RentalScore } from "../type";
+import axios from "axios";
 
 export const RentalScoreContext = createContext<RentalScore[]>([]);
 
@@ -11,18 +12,16 @@ export const RentalScoreProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const fetchRentalScores = async () => {
       try {
-        const response = await fetch("http://0.0.0.0:8000/api/rentalScore");
-        console.log("fetch");
-        if (!response.ok) {
-          throw new Error("Failed to fetch rental scores");
-        }
-        const data = await response.json();
-        setRentalScores(data as RentalScore[]);
+        const response = await axios.get("http://0.0.0.0:8000/api/rentalScore");
+        const data = response.data;
+        const rentalScores = data as RentalScore[];
+        console.log(rentalScores.slice(0, 5)); // Log the first 5 rental scores
+        return rentalScores;
       } catch (error) {
         console.error("Error fetching rental scores:", error);
       }
     };
-    fetchRentalScores();
+    void fetchRentalScores().then((data) => setRentalScores(data!));
   }, []);
 
   return (

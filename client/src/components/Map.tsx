@@ -1,19 +1,14 @@
 import { useState, useEffect, useContext } from "react";
 import {
-  GoogleMap,
-  Marker,
+  Map as GoogleMap,
   InfoWindow,
-  useJsApiLoader,
-  MarkerClusterer,
-} from "@react-google-maps/api";
-import { RentalScoreContext } from "../contexts/RentalScoreContext";
-import { config } from "../config/index";
-import { MapFilter, RentalScore } from "../type";
+  Marker,
+} from "@vis.gl/react-google-maps";
 
-const containerStyle = {
-  width: "100%",
-  height: "100vh",
-};
+import { RentalScoreContext } from "../contexts/RentalScoreContext";
+
+import { MapFilter, RentalScore } from "../type";
+// import { ClusteredMarker } from "./ClusterMarker";
 
 const center = {
   lat: 38.9072,
@@ -21,9 +16,6 @@ const center = {
 };
 
 const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: config.googleMapsApiKey,
-  });
   const rentalScores = useContext(RentalScoreContext);
   const [filteredLocations, setFilteredLocations] = useState<RentalScore[]>([]);
   const [selected, setSelected] = useState<RentalScore>({} as RentalScore);
@@ -38,6 +30,7 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
 
   useEffect(() => {
     const filtered = filterRentalLocations(rentalScores, filters);
+    console.log("Filtered length:", filtered.length);
     setFilteredLocations(filtered);
   }, [rentalScores, filters]);
 
@@ -46,10 +39,11 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
     filters: MapFilter
   ): RentalScore[] => {
     return locations.filter((loc) => {
+      if (!filters.State.includes(loc.state)) return false;
       if (loc.qolScore < filters.QolScore) return false;
       if (loc.walkScore < filters.WalkScore) return false;
       if (loc.busStopsNumber < filters.BusStopsNumber) return false;
-      if (loc.price < filters.Price) return false;
+      if (loc.price > filters.Price) return false;
       if (loc.airQualityScore < filters.AirQualityScore) return false;
       if (loc.openStreetNumber < filters.ParkNumber) return false;
       if (loc.reviewScore < filters.Review) return false;
@@ -64,7 +58,7 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
     });
   };
 
-  if (!isLoaded) return <div className="text-center p-6">Loading Map...</div>;
+  // if (!isLoaded) return <div className="text-center p-6">Loading Map...</div>;
 
   return (
     <div className="relative">
@@ -92,39 +86,50 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
       </div>
 
       {/* Google Map */}
-      <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={12}>
-        {filteredLocations.map((loc, index) => (
-          <MarkerClusterer key={index}>
-            {(clusterer) => (
-              <Marker
-                position={{ lat: loc.lat, lng: loc.long }}
-                clusterer={clusterer}
-                icon={{
-                  path: google.maps.SymbolPath.CIRCLE,
-                  scale: 15, // Adjust scale to keep the oval size appropriate
-                  fillColor:
-                    loc.qolScore >= 80
-                      ? "#86efac" // Tailwind green-300
-                      : loc.qolScore >= 60
-                      ? "#fde047" // Tailwind yellow-300
-                      : loc.qolScore >= 40
-                      ? "#fdba74" // Tailwind orange-300
-                      : "#fca5a5", // Tailwind red-300
-                  fillOpacity: 1,
-                  strokeWeight: 1,
-                }}
-                onClick={() => setSelected(loc)}
-                label={{
-                  text: loc.price.toString(),
-                  color: "black",
-                  fontSize: "12px",
-                  fontWeight: "bold",
-                  className: "text-center", // Ensures text is centered
-                }}
-              />
-            )}
-          </MarkerClusterer>
-        ))}
+      <GoogleMap
+        defaultCenter={center}
+        defaultZoom={10}
+        mapId="cde3df1b3d78f48c"
+        className="h-screen w-full"
+        disableDefaultUI
+        gestureHandling={"greedy"}
+        zoomControl={true}
+      >
+        {/* <ClusteredMarker
+          locations={filteredLocations}
+          setSelected={setSelected}
+          setClusterMarkers={setClusterMarkers}
+        /> */}
+        {filteredLocations.map((location, index) => {
+          return (
+            <Marker
+              key={index}
+              position={{ lat: location.lat, lng: location.long }}
+              icon={{
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 15, // Adjust scale to keep the oval size appropriate
+                fillColor:
+                  location.qolScore >= 80
+                    ? "#86efac" // Tailwind green-300
+                    : location.qolScore >= 60
+                    ? "#fde047" // Tailwind yellow-300
+                    : location.qolScore >= 40
+                    ? "#fdba74" // Tailwind orange-300
+                    : "#fca5a5", // Tailwind red-300
+                fillOpacity: 1,
+                strokeWeight: 1,
+              }}
+              onClick={() => setSelected(location)}
+              label={{
+                text: location.price.toString(),
+                color: "black",
+                fontSize: "12px",
+                fontWeight: "bold",
+              }}
+              // ref={(marker) => setMarkerRef(marker, location.name)}
+            ></Marker>
+          );
+        })}
 
         {selected.lat !== undefined && selected.long !== undefined && (
           <InfoWindow
