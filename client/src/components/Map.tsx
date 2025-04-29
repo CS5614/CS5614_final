@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useMemo } from "react";
 import {
   AdvancedMarker,
   AdvancedMarkerAnchorPoint,
@@ -20,6 +20,54 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
   const rentalScores = useContext(RentalScoreContext);
   const [filteredLocations, setFilteredLocations] = useState<RentalScore[]>([]);
   const [selected, setSelected] = useState<RentalScore>({} as RentalScore);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, setSelectedLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [locationsAtPoint, setLocationsAtPoint] = useState<RentalScore[]>([]);
+  const [currentLocationIndex, setCurrentLocationIndex] = useState(0);
+
+  // Group locations by coordinates
+  const groupedLocations = useMemo(() => {
+    const groups: Record<string, RentalScore[]> = {};
+
+    filteredLocations.forEach((location) => {
+      const key = `${location.lat.toFixed(6)},${location.long.toFixed(6)}`;
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(location);
+    });
+
+    return groups;
+  }, [filteredLocations]);
+
+  // Handle marker click
+  const handleMarkerClick = (key: string, locations: RentalScore[]) => {
+    const [lat, lng] = key.split(",").map(Number);
+    setSelectedLocation({ lat, lng });
+    setLocationsAtPoint(locations);
+    setCurrentLocationIndex(0);
+    setSelected(locations[0]);
+  };
+
+  // Navigate between properties at same location
+  const nextProperty = () => {
+    if (locationsAtPoint.length <= 1) return;
+    const nextIndex = (currentLocationIndex + 1) % locationsAtPoint.length;
+    setCurrentLocationIndex(nextIndex);
+    setSelected(locationsAtPoint[nextIndex]);
+  };
+
+  const prevProperty = () => {
+    if (locationsAtPoint.length <= 1) return;
+    const prevIndex =
+      (currentLocationIndex - 1 + locationsAtPoint.length) %
+      locationsAtPoint.length;
+    setCurrentLocationIndex(prevIndex);
+    setSelected(locationsAtPoint[prevIndex]);
+  };
 
   // Add a legend for QOL color indicators
   const qolLegend = [
@@ -98,77 +146,45 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
         gestureHandling={"greedy"}
         zoomControl={true}
       >
-        {/* <ClusteredMarker
-          locations={filteredLocations}
-          setSelected={setSelected}
-          setClusterMarkers={setClusterMarkers}
-        /> */}
-        {filteredLocations.map((location, index) => {
+        {Object.entries(groupedLocations).map(([key, locations]) => {
+          const [lat, lng] = key.split(",").map(Number);
+          const representative = locations[0]; // Use first location's QOL for color
+          const count = locations.length;
+
           return (
-            // <Marker
-            //   key={index}
-            //   position={{ lat: location.lat, lng: location.long }}
-            //   icon={{
-            //     path: google.maps.SymbolPath.CIRCLE,
-            //     scale: 15, // Adjust scale to keep the oval size appropriate
-            //     fillColor:
-            //       location.qolScore >= 80
-            //         ? "#86efac" // Tailwind green-300
-            //         : location.qolScore >= 60
-            //         ? "#fde047" // Tailwind yellow-300
-            //         : location.qolScore >= 40
-            //         ? "#fdba74" // Tailwind orange-300
-            //         : "#fca5a5", // Tailwind red-300
-            //     fillOpacity: 1,
-            //     strokeWeight: 1,
-            //   }}
-            //   onClick={() => setSelected(location)}
-            //   label={{
-            //     text: location.price.toString(),
-            //     color: "black",
-            //     fontSize: "12px",
-            //     fontWeight: "bold",
-            //   }}
-            // />
             <AdvancedMarker
-              key={index}
-              position={{ lat: location.lat, lng: location.long }}
-              onClick={() => setSelected(location)}
+              key={key}
+              position={{ lat, lng }}
+              onClick={() => handleMarkerClick(key, locations)}
               anchorPoint={AdvancedMarkerAnchorPoint.TOP_LEFT}
             >
               <div
                 className={`absolute -top-2 -left-2 text-xs font-bold text-gray-800 rounded-full p-1 ${
-                  location.qolScore >= 80
+                  representative.qolScore >= 80
                     ? "bg-green-300"
-                    : location.qolScore >= 60
+                    : representative.qolScore >= 60
                     ? "bg-yellow-300"
-                    : location.qolScore >= 40
+                    : representative.qolScore >= 40
                     ? "bg-orange-300"
                     : "bg-red-300"
                 }`}
               >
-                ${location.price}
+                ${representative.price}
+                {count > 1 && (
+                  <span className="ml-1 bg-blue-500 text-white rounded-full px-1.5 py-0.5">
+                    +{count - 1}
+                  </span>
+                )}
               </div>
               <span className="text-[2rem] w-full text-center">
-                {location.qolScore >= 80
+                {representative.qolScore >= 80
                   ? "🏡"
-                  : location.qolScore >= 60
+                  : representative.qolScore >= 60
                   ? "🏠"
-                  : location.qolScore >= 40
+                  : representative.qolScore >= 40
                   ? "🛖"
                   : "🏚️"}
               </span>
-              {/* <Pin
-                background={
-                  location.qolScore >= 80
-                    ? "#86efac"
-                    : location.qolScore >= 60
-                    ? "#fde047"
-                    : location.qolScore >= 40
-                    ? "#fdba74"
-                    : "#fca5a5"
-                }
-              /> */}
             </AdvancedMarker>
           );
         })}
@@ -176,7 +192,11 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
         {selected.lat !== undefined && selected.long !== undefined && (
           <InfoWindow
             position={{ lat: selected.lat, lng: selected.long }}
-            onCloseClick={() => setSelected({} as RentalScore)}
+            onCloseClick={() => {
+              setSelected({} as RentalScore);
+              setLocationsAtPoint([]);
+              setSelectedLocation(null);
+            }}
           >
             <div className="w-80 p-4 bg-white rounded-lg shadow-lg text-gray-800 font-sans">
               {/* Title and Price */}
@@ -186,6 +206,28 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
               <p className="text-lg text-blue-600 font-semibold mb-4">
                 ${selected.price}/mo
               </p>
+
+              {/* Multi-property navigation if needed */}
+              {locationsAtPoint.length > 1 && (
+                <div className="flex justify-between items-center mb-3 bg-gray-100 p-2 rounded">
+                  <button
+                    onClick={prevProperty}
+                    className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                  >
+                    ←
+                  </button>
+                  <span className="text-sm font-medium">
+                    {currentLocationIndex + 1} of {locationsAtPoint.length}{" "}
+                    properties
+                  </span>
+                  <button
+                    onClick={nextProperty}
+                    className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                  >
+                    →
+                  </button>
+                </div>
+              )}
 
               {/* Details Grid */}
               <div className="grid grid-cols-2 gap-y-3 text-sm">
