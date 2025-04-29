@@ -25,6 +25,7 @@ class QualityOfLifeConverter:
           SELECT
             rl.listing_db_id,
             COALESCE(rl.listing_name,'')   AS name,
+            rl.formatted_address          AS address,
             rl.latitude                     AS lat,
             rl.longitude                    AS long,
             COALESCE(rl.price,0)            AS price,
@@ -106,6 +107,7 @@ class QualityOfLifeConverter:
         SELECT
           rb.listing_db_id,
           rb.name,
+          rb.address,
           rb.lat,
           rb.long,
           rb.price,

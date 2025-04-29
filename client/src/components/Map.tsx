@@ -9,7 +9,6 @@ import {
 import { RentalScoreContext } from "../contexts/RentalScoreContext";
 
 import { MapFilter, RentalScore } from "../type";
-// import { ClusteredMarker } from "./ClusterMarker";
 
 const center = {
   lat: 38.9072,
@@ -99,7 +98,10 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
       if (loc.bathroom < filters.Bathroom) return false;
       if (loc.bedroom < filters.Bedroom) return false;
       if (
-        filters.SearchQuery &&
+        (filters.SearchQuery &&
+          !loc.address
+            .toLowerCase()
+            .includes(filters.SearchQuery.toLowerCase())) ||
         !loc.name.toLowerCase().includes(filters.SearchQuery.toLowerCase())
       )
         return false;
@@ -139,7 +141,7 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
       {/* Google Map */}
       <GoogleMap
         defaultCenter={center}
-        defaultZoom={10}
+        defaultZoom={12}
         mapId="cde3df1b3d78f48c"
         className="h-screen w-full"
         disableDefaultUI
@@ -206,6 +208,9 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
               <p className="text-lg text-blue-600 font-semibold mb-4">
                 ${selected.price}/mo
               </p>
+              {selected.address !== selected.name && (
+                <p className="text-base text-gray-600">{selected.address}</p>
+              )}
 
               {/* Multi-property navigation if needed */}
               {locationsAtPoint.length > 1 && (

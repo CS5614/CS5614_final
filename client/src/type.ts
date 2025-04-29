@@ -12,6 +12,7 @@ export interface RentalScore {
     bedroom: number;
     bathroom: number;
     state: string;
+    address: string;
 }
 
 export interface MapFilter {
