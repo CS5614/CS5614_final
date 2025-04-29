@@ -2,6 +2,8 @@ import os
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from .routes.rental_score import router as rental_score_router
+from .routes.bus_stop_list import router as bus_list_router
+from .routes.park_list import router as park_list_router
 from fastapi.middleware.cors import CORSMiddleware
 
 # get args from cmd
@@ -18,6 +20,8 @@ def create_app() -> FastAPI:
     # Include routers
 
     app.include_router(rental_score_router)
+    app.include_router(bus_list_router)
+    app.include_router(park_list_router)
 
     # Mount static files for the frontend
     if IS_DEV:

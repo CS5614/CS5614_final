@@ -2,6 +2,7 @@ from pydantic import BaseModel
 
 
 class RentalScoreModel(BaseModel):
+    id: int
     lat: float
     long: float
     name: str
@@ -9,7 +10,9 @@ class RentalScoreModel(BaseModel):
     walkScore: float
     airQualityScore: float
     busStopsNumber: int
+    nearestBusStopDistance: float
     openStreetNumber: int
+    nearestParkDistance: float
     reviewScore: float
     price: float
     bedroom: float

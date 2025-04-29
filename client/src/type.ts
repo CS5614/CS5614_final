@@ -1,4 +1,5 @@
 export interface RentalScore {
+    id: number;
     lat: number;
     long: number;
     name: string;
@@ -6,7 +7,9 @@ export interface RentalScore {
     walkScore: number;
     airQualityScore: number;
     busStopsNumber: number;
+    nearestBusStopDistance: number;
     openStreetNumber: number;
+    nearestParkDistance: number;
     reviewScore: number;
     price: number;
     bedroom: number;
