@@ -1,6 +1,6 @@
 import React from "react";
 import { MapFilter } from "../type";
-import { defaultFilters } from "../App";
+import { defaultFilters } from "../consts/defaultFilters";
 
 interface Props {
   filters: MapFilter;
@@ -17,7 +17,7 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
             Enter address or building name
           </label>
           <input
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
             type="text"
             value={filters.SearchQuery}
             onChange={(e) =>
@@ -27,7 +27,9 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
           />
         </div>
         <div className="text-gray-600">
-          <label className="block text-sm font-medium text-center mb-2">State</label>
+          <label className="block text-sm font-medium text-center mb-2">
+            State
+          </label>
           <div className="flex space-x-4 justify-center">
             <label>
               <input
@@ -98,7 +100,9 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
               setFilters({ ...filters, QolScore: Number(e.target.value) })
             }
           />
-          <div className="text-sm text-gray-500 text-center">{filters.QolScore}</div>
+          <div className="text-sm text-gray-500 text-center">
+            {filters.QolScore}
+          </div>
         </div>
 
         <div>
@@ -138,7 +142,9 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
               setFilters({ ...filters, Bedroom: Number(e.target.value) })
             }
           />
-          <div className="text-sm text-gray-500 text-center">{filters.Bedroom}</div>
+          <div className="text-sm text-gray-500 text-center">
+            {filters.Bedroom}
+          </div>
         </div>
 
         <div>
@@ -156,7 +162,9 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
               setFilters({ ...filters, Bathroom: Number(e.target.value) })
             }
           />
-          <div className="text-sm text-gray-500 text-center">{filters.Bathroom}</div>
+          <div className="text-sm text-gray-500 text-center">
+            {filters.Bathroom}
+          </div>
         </div>
 
         <div>
@@ -177,7 +185,9 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
               })
             }
           />
-          <div className="text-sm text-gray-500 text-center">{filters.AirQualityScore}</div>
+          <div className="text-sm text-gray-500 text-center">
+            {filters.AirQualityScore}
+          </div>
         </div>
 
         <div>
@@ -195,7 +205,9 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
               setFilters({ ...filters, WalkScore: Number(e.target.value) })
             }
           />
-          <div className="text-sm text-gray-500 text-center">{filters.WalkScore}</div>
+          <div className="text-sm text-gray-500 text-center">
+            {filters.WalkScore}
+          </div>
         </div>
 
         <div>
@@ -213,7 +225,9 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
               setFilters({ ...filters, Review: Number(e.target.value) })
             }
           />
-          <div className="text-sm text-gray-500 text-center">{filters.Review}</div>
+          <div className="text-sm text-gray-500 text-center">
+            {filters.Review}
+          </div>
         </div>
 
         <div className="text-center">

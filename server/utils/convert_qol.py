@@ -9,7 +9,9 @@ class QualityOfLifeConverter:
     def __init__(self):
         pass
 
-    def _normalize_qol_score(self, score: float, min_score: float, max_score: float) -> float:
+    def _normalize_qol_score(
+        self, score: float, min_score: float, max_score: float
+    ) -> float:
         """Normalize a score to 0–1 scale."""
         if max_score == min_score:
             return 0.0
@@ -25,6 +27,7 @@ class QualityOfLifeConverter:
           SELECT
             rl.listing_db_id,
             COALESCE(rl.listing_name,'')   AS name,
+            rl.formatted_address          AS address,
             rl.latitude                     AS lat,
             rl.longitude                    AS long,
             COALESCE(rl.price,0)            AS price,
@@ -104,8 +107,9 @@ class QualityOfLifeConverter:
           WHERE rl.state IN ('DC','MD','VA')
         )
         SELECT
-          rb.listing_db_id,
+          rb.listing_db_id                    AS id,
           rb.name,
+          rb.address,
           rb.lat,
           rb.long,
           rb.price,
@@ -118,8 +122,8 @@ class QualityOfLifeConverter:
           rb."reviewScore",
           COALESCE(bsc."busStopsNumber",0)     AS "busStopsNumber",
           COALESCE(pc."openStreetNumber",0)    AS "openStreetNumber",
-          COALESCE(nb."nearestBusStopMiles",0) AS "nearestBusStopMiles",
-          COALESCE(np."nearestParkMiles",0)    AS "nearestParkMiles"
+          COALESCE(nb."nearestBusStopMiles",0) AS "nearestBusStopDistance",
+          COALESCE(np."nearestParkMiles",0)    AS "nearestParkDistance"
         FROM RentalBase rb
         LEFT JOIN NearestBus nb    ON rb.listing_db_id = nb.listing_db_id
         LEFT JOIN BusStopCount bsc ON rb.listing_db_id = bsc.listing_db_id
@@ -152,9 +156,15 @@ class QualityOfLifeConverter:
                 for k, v in rec.items():
                     rec[k] = self._convert_decimals(v)
                 # normalize QoL
-                rec["qolScore"] = round((self._normalize_qol_score(
-                    rec.get("qolScore", 0), min_qol, max_qol
-                ))*100, 2)
+                rec["qolScore"] = round(
+                    (
+                        self._normalize_qol_score(
+                            rec.get("qolScore", 0), min_qol, max_qol
+                        )
+                    )
+                    * 100,
+                    2,
+                )
             return records
 
         except Exception as e:

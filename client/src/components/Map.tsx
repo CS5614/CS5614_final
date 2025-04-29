@@ -7,9 +7,16 @@ import {
 } from "@vis.gl/react-google-maps";
 
 import { RentalScoreContext } from "../contexts/RentalScoreContext";
-
 import { MapFilter, RentalScore } from "../type";
-// import { ClusteredMarker } from "./ClusterMarker";
+
+// Interfaces for API responses
+interface BusStopsResponse {
+  nearby_bus_stops: string;
+}
+
+interface ParksResponse {
+  nearby_parks: string;
+}
 
 const center = {
   lat: 38.9072,
@@ -20,15 +27,161 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
   const rentalScores = useContext(RentalScoreContext);
   const [filteredLocations, setFilteredLocations] = useState<RentalScore[]>([]);
   const [selected, setSelected] = useState<RentalScore>({} as RentalScore);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, setSelectedLocation] = useState<{
+  const [, setSelectedLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
   const [locationsAtPoint, setLocationsAtPoint] = useState<RentalScore[]>([]);
   const [currentLocationIndex, setCurrentLocationIndex] = useState(0);
 
-  // Group locations by coordinates
+  // State for nearby amenities
+  const [nearbyBusStops, setNearbyBusStops] = useState<string[]>([]);
+  const [nearbyParks, setNearbyParks] = useState<string[]>([]);
+  const [isLoadingBusStops, setIsLoadingBusStops] = useState(false);
+  const [isLoadingParks, setIsLoadingParks] = useState(false);
+
+  // Fetch nearby bus stops
+  const fetchNearbyBusStops = async (listingId: number) => {
+    try {
+      setIsLoadingBusStops(true);
+      const response = await fetch(
+        `http://0.0.0.0:8000/api/busStopsInOneMiles/${listingId}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch bus stops");
+      }
+      const data: BusStopsResponse = await response.json();
+
+      // Split the comma-separated string into an array
+      const busStops = data.nearby_bus_stops
+        ? data.nearby_bus_stops.split(", ").filter((stop) => stop.trim())
+        : [];
+
+      setNearbyBusStops(busStops);
+    } catch (error) {
+      console.error("Error fetching bus stops:", error);
+      setNearbyBusStops([]);
+    } finally {
+      setIsLoadingBusStops(false);
+    }
+  };
+
+  // Fetch nearby parks
+  const fetchNearbyParks = async (listingId: number) => {
+    try {
+      setIsLoadingParks(true);
+      const response = await fetch(
+        `http://0.0.0.0:8000/api/parksInOneMiles/${listingId}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch parks");
+      }
+      const data: ParksResponse = await response.json();
+
+      // Split the comma-separated string into an array
+      const parks = data.nearby_parks
+        ? data.nearby_parks.split(", ").filter((park) => park.trim())
+        : [];
+
+      setNearbyParks(parks);
+    } catch (error) {
+      console.error("Error fetching parks:", error);
+      setNearbyParks([]);
+    } finally {
+      setIsLoadingParks(false);
+    }
+  };
+
+  // Enhanced marker click handler to fetch details
+  const handleMarkerClick = (key: string, locations: RentalScore[]) => {
+    const [lat, lng] = key.split(",").map(Number);
+    setSelectedLocation({ lat, lng });
+    setLocationsAtPoint(locations);
+    setCurrentLocationIndex(0);
+
+    const selectedLocation = locations[0];
+    setSelected(selectedLocation);
+
+    // Reset previous data
+    setNearbyBusStops([]);
+    setNearbyParks([]);
+
+    // Fetch new data for the selected location
+    if (selectedLocation) {
+      fetchNearbyBusStops(selectedLocation.id);
+      fetchNearbyParks(selectedLocation.id);
+    }
+  };
+
+  // Enhanced property navigation to fetch new data
+  const nextProperty = () => {
+    if (locationsAtPoint.length <= 1) return;
+    const nextIndex = (currentLocationIndex + 1) % locationsAtPoint.length;
+    setCurrentLocationIndex(nextIndex);
+
+    const nextLocation = locationsAtPoint[nextIndex];
+    setSelected(nextLocation);
+
+    // Fetch data for the new selection
+    if (nextLocation.id) {
+      fetchNearbyBusStops(nextLocation.id);
+      fetchNearbyParks(nextLocation.id);
+    }
+  };
+
+  const prevProperty = () => {
+    if (locationsAtPoint.length <= 1) return;
+    const prevIndex =
+      (currentLocationIndex - 1 + locationsAtPoint.length) %
+      locationsAtPoint.length;
+    setCurrentLocationIndex(prevIndex);
+
+    const prevLocation = locationsAtPoint[prevIndex];
+    setSelected(prevLocation);
+
+    // Fetch data for the new selection
+    if (prevLocation.id) {
+      fetchNearbyBusStops(prevLocation.id);
+      fetchNearbyParks(prevLocation.id);
+    }
+  };
+
+  // Filter rentals based on filters - existing code...
+  useEffect(() => {
+    const filtered = filterRentalLocations(rentalScores, filters);
+    console.log("Filtered length:", filtered.length);
+    setFilteredLocations(filtered);
+  }, [rentalScores, filters]);
+
+  const filterRentalLocations = (
+    locations: RentalScore[],
+    filters: MapFilter
+  ): RentalScore[] => {
+    // Existing filter implementation...
+    return locations.filter((loc) => {
+      if (!filters.State.includes(loc.state)) return false;
+      if (loc.qolScore < filters.QolScore) return false;
+      if (loc.walkScore < filters.WalkScore) return false;
+      if (loc.busStopsNumber < filters.BusStopsNumber) return false;
+      if (loc.price > filters.Price) return false;
+      if (loc.airQualityScore < filters.AirQualityScore) return false;
+      if (loc.openStreetNumber < filters.ParkNumber) return false;
+      if (loc.reviewScore < filters.Review) return false;
+      if (loc.bathroom < filters.Bathroom) return false;
+      if (loc.bedroom < filters.Bedroom) return false;
+      if (
+        (filters.SearchQuery &&
+          !loc.address
+            .toLowerCase()
+            .includes(filters.SearchQuery.toLowerCase())) ||
+        !loc.name.toLowerCase().includes(filters.SearchQuery.toLowerCase())
+      )
+        return false;
+      return true;
+    });
+  };
+
+  // Group locations by coordinates - existing code...
   const groupedLocations = useMemo(() => {
     const groups: Record<string, RentalScore[]> = {};
 
@@ -43,32 +196,6 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
     return groups;
   }, [filteredLocations]);
 
-  // Handle marker click
-  const handleMarkerClick = (key: string, locations: RentalScore[]) => {
-    const [lat, lng] = key.split(",").map(Number);
-    setSelectedLocation({ lat, lng });
-    setLocationsAtPoint(locations);
-    setCurrentLocationIndex(0);
-    setSelected(locations[0]);
-  };
-
-  // Navigate between properties at same location
-  const nextProperty = () => {
-    if (locationsAtPoint.length <= 1) return;
-    const nextIndex = (currentLocationIndex + 1) % locationsAtPoint.length;
-    setCurrentLocationIndex(nextIndex);
-    setSelected(locationsAtPoint[nextIndex]);
-  };
-
-  const prevProperty = () => {
-    if (locationsAtPoint.length <= 1) return;
-    const prevIndex =
-      (currentLocationIndex - 1 + locationsAtPoint.length) %
-      locationsAtPoint.length;
-    setCurrentLocationIndex(prevIndex);
-    setSelected(locationsAtPoint[prevIndex]);
-  };
-
   // Add a legend for QOL color indicators
   const qolLegend = [
     { color: "green", range: "80+", icon: "🏡" },
@@ -77,41 +204,9 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
     { color: "red", range: "Below 40", icon: "🏚️" },
   ];
 
-  useEffect(() => {
-    const filtered = filterRentalLocations(rentalScores, filters);
-    console.log("Filtered length:", filtered.length);
-    setFilteredLocations(filtered);
-  }, [rentalScores, filters]);
-
-  const filterRentalLocations = (
-    locations: RentalScore[],
-    filters: MapFilter
-  ): RentalScore[] => {
-    return locations.filter((loc) => {
-      if (!filters.State.includes(loc.state)) return false;
-      if (loc.qolScore < filters.QolScore) return false;
-      if (loc.walkScore < filters.WalkScore) return false;
-      if (loc.busStopsNumber < filters.BusStopsNumber) return false;
-      if (loc.price > filters.Price) return false;
-      if (loc.airQualityScore < filters.AirQualityScore) return false;
-      if (loc.openStreetNumber < filters.ParkNumber) return false;
-      if (loc.reviewScore < filters.Review) return false;
-      if (loc.bathroom < filters.Bathroom) return false;
-      if (loc.bedroom < filters.Bedroom) return false;
-      if (
-        filters.SearchQuery &&
-        !loc.name.toLowerCase().includes(filters.SearchQuery.toLowerCase())
-      )
-        return false;
-      return true;
-    });
-  };
-
-  // if (!isLoaded) return <div className="text-center p-6">Loading Map...</div>;
-
   return (
     <div className="relative">
-      {/* QOL Legend */}
+      {/* QOL Legend - existing code... */}
       <div className="absolute top-4 left-4 bg-white p-4 rounded shadow-md z-10">
         <h3 className="text-lg font-semibold mb-2 text-gray-900">QOL Legend</h3>
         <ul>
@@ -136,19 +231,20 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
         </ul>
       </div>
 
-      {/* Google Map */}
+      {/* Google Map - existing code... */}
       <GoogleMap
         defaultCenter={center}
-        defaultZoom={10}
+        defaultZoom={12}
         mapId="cde3df1b3d78f48c"
         className="h-screen w-full"
         disableDefaultUI
         gestureHandling={"greedy"}
         zoomControl={true}
       >
+        {/* Markers - existing code... */}
         {Object.entries(groupedLocations).map(([key, locations]) => {
           const [lat, lng] = key.split(",").map(Number);
-          const representative = locations[0]; // Use first location's QOL for color
+          const representative = locations[0];
           const count = locations.length;
 
           return (
@@ -189,6 +285,7 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
           );
         })}
 
+        {/* Info Window with enhanced details */}
         {selected.lat !== undefined && selected.long !== undefined && (
           <InfoWindow
             position={{ lat: selected.lat, lng: selected.long }}
@@ -196,6 +293,8 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
               setSelected({} as RentalScore);
               setLocationsAtPoint([]);
               setSelectedLocation(null);
+              setNearbyBusStops([]);
+              setNearbyParks([]);
             }}
           >
             <div className="w-80 p-4 bg-white rounded-lg shadow-lg text-gray-800 font-sans">
@@ -206,8 +305,11 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
               <p className="text-lg text-blue-600 font-semibold mb-4">
                 ${selected.price}/mo
               </p>
+              {selected.address !== selected.name && (
+                <p className="text-base text-gray-600">{selected.address}</p>
+              )}
 
-              {/* Multi-property navigation if needed */}
+              {/* Multi-property navigation */}
               {locationsAtPoint.length > 1 && (
                 <div className="flex justify-between items-center mb-3 bg-gray-100 p-2 rounded">
                   <button
@@ -229,8 +331,9 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
                 </div>
               )}
 
-              {/* Details Grid */}
+              {/* Property Details Grid */}
               <div className="grid grid-cols-2 gap-y-3 text-sm">
+                {/* Basic details - existing code... */}
                 <div className="font-medium flex items-center">
                   <span className="mr-2">🌟</span> QOL:
                 </div>
@@ -261,15 +364,72 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
                 </div>
                 <div>{selected.airQualityScore}</div>
 
+                {/* Streamlined Bus Stops Section */}
                 <div className="font-medium flex items-center">
                   <span className="mr-2">🚌</span> Bus Stops:
                 </div>
-                <div>{selected.busStopsNumber}</div>
+                <div className="flex flex-col">
+                  {isLoadingBusStops ? (
+                    <div className="text-xs text-gray-500">
+                      Loading bus stops...
+                    </div>
+                  ) : (
+                    <details className="text-xs">
+                      <summary className="cursor-pointer text-blue-600 hover:text-blue-800">
+                        {selected.busStopsNumber} nearby stops
+                      </summary>
+                      <div className="max-h-32 overflow-y-auto mt-1 pl-2 pr-1">
+                        <p className="mb-1 text-gray-700">
+                          <span className="font-medium">Nearest:</span>{" "}
+                          {selected.nearestBusStopDistance.toFixed(2)} miles
+                        </p>
+                        <ul className="list-disc pl-4">
+                          {nearbyBusStops.slice(0, 10).map((stop, idx) => (
+                            <li key={idx} className="mb-1">
+                              {stop}
+                            </li>
+                          ))}
+                          {nearbyBusStops.length > 10 && (
+                            <li className="text-gray-500">
+                              +{nearbyBusStops.length - 10} more stops
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    </details>
+                  )}
+                </div>
 
+                {/* Streamlined Parks Section */}
                 <div className="font-medium flex items-center">
                   <span className="mr-2">🌳</span> Parks:
                 </div>
-                <div>{selected.openStreetNumber}</div>
+                <div className="flex flex-col">
+                  {isLoadingParks ? (
+                    <div className="text-xs text-gray-500">
+                      Loading parks...
+                    </div>
+                  ) : (
+                    <details className="text-xs">
+                      <summary className="cursor-pointer text-blue-600 hover:text-blue-800">
+                        {selected.openStreetNumber} nearby parks
+                      </summary>
+                      <div className="mt-1 pl-2">
+                        <p className="mb-1 text-gray-700">
+                          <span className="font-medium">Nearest:</span>{" "}
+                          {selected.nearestParkDistance.toFixed(2)} miles
+                        </p>
+                        <ul className="list-disc pl-4">
+                          {nearbyParks.map((park, idx) => (
+                            <li key={idx} className="mb-1">
+                              {park}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </details>
+                  )}
+                </div>
 
                 <div className="font-medium flex items-center">
                   <span className="mr-2">⭐</span> Reviews:
