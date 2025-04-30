@@ -18,7 +18,7 @@ const Map: React.FC<{ filters: MapFilter }> = ({ filters }) => {
   const rentalScores = useContext(RentalScoreContext);
   const [filteredLocations, setFilteredLocations] = useState<RentalScore[]>([]);
   const [selected, setSelected] = useState<RentalScore>({} as RentalScore);
-  const [selectedLocation, setSelectedLocation] = useState<{
+  const [, setSelectedLocation] = useState<{
     lat: number;
     lng: number;
   } | null>(null);

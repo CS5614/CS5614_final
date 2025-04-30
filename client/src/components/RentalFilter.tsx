@@ -91,7 +91,7 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
           </label>
           <input
             title="Qol Score"
-            className="w-full"
+            className="w-full accent-blue-500"
             type="range"
             min="0"
             max="100"
@@ -111,7 +111,7 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
           </label>
           <input
             title="Max Price"
-            className="w-full"
+            className="w-full accent-blue-500"
             type="range"
             min="0"
             max="12000"
@@ -133,7 +133,7 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
           </label>
           <input
             title="Bedroom"
-            className="w-full"
+            className="w-full accent-blue-500"
             type="range"
             min="1"
             max="5"
@@ -153,7 +153,7 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
           </label>
           <input
             title="Bathroom"
-            className="w-full"
+            className="w-full accent-blue-500"
             type="range"
             min="1"
             max="5"
@@ -173,7 +173,7 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
           </label>
           <input
             title="Air Quality Index"
-            className="w-full"
+            className="w-full accent-blue-500"
             type="range"
             min="0"
             max="100"
@@ -196,7 +196,7 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
           </label>
           <input
             title="Walk Score"
-            className="w-full"
+            className="w-full accent-blue-500"
             type="range"
             min="0"
             max="100"
@@ -216,7 +216,7 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
           </label>
           <input
             title="Google Review"
-            className="w-full"
+            className="w-full accent-blue-500"
             type="range"
             min="0"
             max="5"
