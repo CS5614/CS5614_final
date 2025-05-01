@@ -198,8 +198,8 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters }) => {
             title="Walk Score"
             className="w-full accent-blue-500"
             type="range"
-            min="0"
-            max="100"
+            min="1"
+            max="20"
             value={filters.WalkScore}
             onChange={(e) =>
               setFilters({ ...filters, WalkScore: Number(e.target.value) })
