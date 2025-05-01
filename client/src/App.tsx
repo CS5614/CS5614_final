@@ -12,7 +12,7 @@ const App: React.FC = () => {
   const [filters, setFilters] = useState<MapFilter>(defaultFilters);
 
   return (
-    <div className="h-screen w-screen flex overflow-hidden">
+    <div className="flex h-screen overflow-hidden">
       <div className="w-80 bg-white shadow-lg z-10 overflow-y-auto">
         <RentalFilter filters={filters} setFilters={setFilters} />
       </div>
