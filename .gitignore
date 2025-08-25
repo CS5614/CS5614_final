@@ -187,3 +187,5 @@ cython_debug/
 /node_modules
 
 prod.env
+
+internal_manual.md

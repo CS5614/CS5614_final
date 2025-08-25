@@ -11,5 +11,5 @@ export const defaultFilters: MapFilter = {
   Bedroom: 2,
   Bathroom: 2,
   SearchQuery: "",
-  State: ["VA"],
+  State: ["DC"],
 };

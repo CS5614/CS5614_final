@@ -11,7 +11,7 @@ export const RentalScoreProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const fetchRentalScores = async () => {
       try {
-        const response = await fetch("http://0.0.0.0:8000/api/rentalScore");
+        const response = await fetch("/api/rentalScore");
         const data = await response.json();
         const rentalScores = data as RentalScore[];
         return rentalScores;

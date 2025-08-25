@@ -24,7 +24,7 @@ async def get_parks_within_miles(listing_id: str) -> Dict:
                     ON ST_DWithin(rl.geom, os.geom, 0.0145)
                     WHERE rl.listing_db_id = %s
                     GROUP BY
-                    rl.listing_id;
+                    rl.listing_db_id;
                     """
                 # Use parameterized query for security
                 cur.execute(sql, (listing_id,))
@@ -33,11 +33,11 @@ async def get_parks_within_miles(listing_id: str) -> Dict:
                 if not records:
                     raise HTTPException(
                         status_code=404,
-                        detail=f"No bus stops found for listing ID: {listing_id}",
+                        detail=f"No parks found for listing ID: {listing_id}",
                     )
 
         return records
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Error fetching bus stops: {str(e)}"
+            status_code=500, detail=f"Error fetching parks : {str(e)}"
         )
