@@ -1,19 +1,6 @@
 # Frontend pnpm build
 FROM node:22-alpine AS frontend-builder
 
-# Accept environment variables as build arguments
-ARG GOOGLE_MAPS_API_KEY
-ARG DB_NAME
-ARG DB_USER
-ARG DB_PASSWORD
-ARG DB_HOST
-
-# Set environment variables from ARG
-ENV GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
-ENV DB_NAME=${DB_NAME}
-ENV DB_USER=${DB_USER}
-ENV DB_PASSWORD=${DB_PASSWORD}
-ENV DB_HOST=${DB_HOST}
 
 RUN corepack enable \
     && corepack prepare pnpm@latest --activate
@@ -25,29 +12,12 @@ RUN pnpm install --frozen-lockfile
 
 COPY client/ ./
 
-RUN mv src/config/index.ts.example src/config/index.ts
 
-RUN sed -i "s/YOUR_GOOGLE_MAPS_API_KEY/${GOOGLE_MAPS_API_KEY}/" src/config/index.ts
 
-RUN cat src/config/index.ts
 RUN pnpm run build
 
 # Python FastAPI server
 FROM python:3.12-slim
-
-# Accept environment variables as build arguments
-ARG GOOGLE_MAPS_API_KEY
-ARG DB_NAME
-ARG DB_USER
-ARG DB_PASSWORD
-ARG DB_HOST
-
-# Set environment variables from ARG
-ENV GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
-ENV DB_NAME=${DB_NAME}
-ENV DB_USER=${DB_USER}
-ENV DB_PASSWORD=${DB_PASSWORD}
-ENV DB_HOST=${DB_HOST}
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
@@ -67,16 +37,11 @@ ENV GDAL_CONFIG=/usr/bin/gdal-config
 COPY ./server .
 COPY --from=frontend-builder /app/dist ./dist
 
-RUN uv sync --frozen --no-cache
-# Replace placeholders in .env with environment variables
-RUN mv .env.example .env
-RUN sed -i "s/YOUR_DB_NAME/${DB_NAME}/" .env
-RUN sed -i "s/YOUR_DB_USER/${DB_USER}/" .env
-RUN sed -i "s/YOUR_DB_PASSWORD/${DB_PASSWORD}/" .env
-RUN sed -i "s/YOUR_DB_HOST/${DB_HOST}/" .env
+RUN uv sync --frozen --no-cache 
 
-RUN cat .env
-ENV PYTHONPATH=/app
+# --- Removed mv/sed/cat commands related to creating/populating .env file ---
+# Backend code MUST be adapted to read DB_* variables via os.getenv()
 
+# Kept original ENTRYPOINT/CMD - BUT likely needs changing for Render
 ENTRYPOINT ["uv"]
 CMD ["run", "fastapi", "run"]
