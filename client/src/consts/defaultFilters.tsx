@@ -12,4 +12,11 @@ export const defaultFilters: MapFilter = {
   Bathroom: 2,
   SearchQuery: "",
   State: ["DC"],
+  weights: {
+    Price: 25,
+    AirQualityScore: 25,
+    WalkScore: 25,
+    Review: 25,
+  },
+  useDynamicWeight: false,
 };
