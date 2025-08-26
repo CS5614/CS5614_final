@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { InfoWindow } from "@vis.gl/react-google-maps";
 import { RentalScore } from "../type";
+import httpClient from "../services/httpClient";
 
 interface BusStopsResponse {
   nearby_bus_stops: string;
@@ -40,9 +41,8 @@ const RentalInfoWindow: React.FC<RentalInfoWindowProps> = ({
   const fetchNearbyBusStops = async (listingId: number) => {
     try {
       setIsLoadingBusStops(true);
-      const response = await fetch(`/api/busStopsInOneMiles/${listingId}`);
-      if (!response.ok) throw new Error("Failed to fetch bus stops");
-      const data: BusStopsResponse = await response.json();
+      const response = await httpClient.get<BusStopsResponse>(`/api/busStopsInOneMiles/${listingId}`);
+      const data: BusStopsResponse = response.data;
       const busStops = data.nearby_bus_stops
         ? data.nearby_bus_stops.split(", ").filter((stop) => stop.trim())
         : [];
@@ -58,9 +58,8 @@ const RentalInfoWindow: React.FC<RentalInfoWindowProps> = ({
   const fetchNearbyParks = async (listingId: number) => {
     try {
       setIsLoadingParks(true);
-      const response = await fetch(`/api/parksInOneMiles/${listingId}`);
-      if (!response.ok) throw new Error("Failed to fetch parks");
-      const data: ParksResponse = await response.json();
+      const response = await httpClient.get<ParksResponse>(`/api/parksInOneMiles/${listingId}`);
+      const data: ParksResponse = response.data;
       const parks = data.nearby_parks
         ? data.nearby_parks.split(", ").filter((park) => park.trim())
         : [];
@@ -153,7 +152,7 @@ const RentalInfoWindow: React.FC<RentalInfoWindowProps> = ({
           <div className="font-medium flex items-center"><span className="mr-2">⭐</span> Reviews:</div>
           <div>{selected.reviewScore === 0 ? "NA" : selected.reviewScore}</div>
         </div>
-        
+
         {/* ADDED: Compare Button */}
         <div className="mt-4">
           <button

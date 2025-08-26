@@ -30,4 +30,11 @@ export interface MapFilter {
     Bathroom: number;
     SearchQuery: string;
     State: string[];
+    weights: {
+        Price: number;
+        AirQualityScore: number;
+        WalkScore: number;
+        Review: number;
+    };
+    useDynamicWeight: boolean;
 }

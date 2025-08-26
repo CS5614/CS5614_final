@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, ReactNode } from "react";
 import { RentalScore } from "../type";
+import httpClient from "../services/httpClient";
 
 export const RentalScoreContext = createContext<RentalScore[]>([]);
 
@@ -11,10 +12,8 @@ export const RentalScoreProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const fetchRentalScores = async () => {
       try {
-        const response = await fetch("/api/rentalScore");
-        const data = await response.json();
-        const rentalScores = data as RentalScore[];
-        return rentalScores;
+        const response = await httpClient.get<RentalScore[]>("/api/rentalScore");
+        return response.data;
       } catch (error) {
         console.error("Error fetching rental scores:", error);
       }
