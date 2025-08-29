@@ -172,6 +172,7 @@ def compute_qol():
     # Log transforms
     df["price"] = np.log1p(df["price"])
     df["nearest_bus_stop_miles"] = np.log1p(df["nearest_bus_stop_miles"])
+    df["nearby_bus_stops"] = np.log1p(df["nearby_bus_stops"])
     df["nearest_park_miles"] = np.log1p(df["nearest_park_miles"])
 
     # features
@@ -189,7 +190,7 @@ def compute_qol():
     # Standardize the features
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
-    df_scaled = pd.DataFrame(X_scaled, columns=features)
+    df_scaled = pd.DataFrame(X_scaled, columns=features, index=df.index)
 
     # Invert direction of the features
     df_scaled["aqi"] *= -1
