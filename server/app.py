@@ -7,6 +7,8 @@ from .routes.park_list import router as park_list_router
 from .routes.get_config import router as config_router
 from .routes.dynamic_qol import router as dynamic_qol_router
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
 
 # get args from cmd
 import sys
@@ -42,6 +44,7 @@ def create_app() -> FastAPI:
         app.add_middleware(
             CORSMiddleware,
             allow_origins=[
+                "http://localhost:5173",
                 "http://localhost:8000",
                 "http://0.0.0.0:8000",
                 "http://127.0.0.1:8000",
@@ -52,6 +55,10 @@ def create_app() -> FastAPI:
             allow_headers=["*"],
         )
         app.mount("/", StaticFiles(directory="dist", html=True), name="client")
+
+    @app.on_event("startup")
+    async def _init_cache():
+        FastAPICache.init(InMemoryBackend(), prefix="rental-cache")
 
     return app
 

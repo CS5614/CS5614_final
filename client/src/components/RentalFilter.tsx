@@ -170,35 +170,45 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose, onQolUpda
         {filters.useDynamicWeight && (
           <div className="mb-6 border rounded-lg p-4 bg-gray-50">
             <div className="text-center font-semibold text-gray-700 mb-2">Dynamic Score Weights</div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               {weightKeys.map((key) => (
-                <div key={key} className="flex flex-col items-center">
-                  <label className="text-sm text-gray-600 mb-1">
-                    {key === "AirQualityScore" ? "Air Quality"
-                      : key === "WalkScore" ? "Walk Score"
-                      : key === "NearestBusStopDistance" ? "Nearest Bus Stop (mi)"
-                      : key === "BusStopsNumber" ? "Nearby Bus Stops"
-                      : key === "OpenStreetNumber" ? "Nearby Parks"
-                      : key === "NearestParkDistance" ? "Nearest Park (mi)"
-                      : key === "Price" ? "Price"
-                      : key}
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={filters.weights?.[key as WeightKey] ?? 0}
-                    onChange={e => {
-                      let val = Number(e.target.value);
-                      if (val < 0) val = 0;
-                      if (val > 100) val = 100;
-                      handleWeightChange(key as WeightKey, val);
-                    }}
-                    className="w-20 px-2 py-1 border border-gray-300 rounded text-center text-gray-900"
-                    title={`Set weight for ${key}`}
-                    placeholder="0"
-                  />
-                  <span className="text-xs text-gray-500">%</span>
+                <div
+                  key={key}
+                  className="flex flex-col items-stretch p-2 rounded bg-white shadow-sm border border-gray-200 min-h-[80px]"
+                >
+                  <div className="flex items-start gap-1 mb-1">
+                    <span className="text-[11px] font-medium text-gray-600 leading-tight flex-1">
+                      {key === "AirQualityScore" ? "Air Quality"
+                        : key === "WalkScore" ? "Walk Score"
+                        : key === "NearestBusStopDistance" ? "Nearest Bus Stop (mi)"
+                        : key === "BusStopsNumber" ? "Nearby Bus Stops"
+                        : key === "OpenStreetNumber" ? "Nearby Parks"
+                        : key === "NearestParkDistance" ? "Nearest Park (mi)"
+                        : key === "Price" ? "Price"
+                        : key}
+                    </span>
+                    <span className="text-[11px] tabular-nums font-semibold text-gray-700 w-8 text-right">
+                      {filters.weights?.[key as WeightKey] ?? 0}%
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={1}
+                      value={filters.weights?.[key as WeightKey] ?? 0}
+                      onChange={e => {
+                        let val = Number(e.target.value);
+                        if (val < 0) val = 0;
+                        if (val > 100) val = 100;
+                        handleWeightChange(key as WeightKey, val);
+                      }}
+                      className="w-full accent-blue-500 h-2 bg-gray-200 rounded-lg cursor-pointer"
+                      title={`Set weight for ${key}`}
+                      aria-label={`Weight slider for ${key}`}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
