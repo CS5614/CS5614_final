@@ -1,12 +1,15 @@
 from ..models.rental_score_model import RentalScoreModel
 from typing import List
 from fastapi import APIRouter, HTTPException
+from fastapi_cache.decorator import cache
 from ..utils.convert_qol import QualityOfLifeConverter
+
 
 router = APIRouter(prefix="/api/rentalScore", tags=["rentalScore"])
 
 
 @router.get("", response_model=List[RentalScoreModel])
+@cache()
 async def get_rental_score():
 
     converter = QualityOfLifeConverter()

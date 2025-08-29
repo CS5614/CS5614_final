@@ -1,5 +1,6 @@
 from typing import Dict, List, Optional
 from fastapi import APIRouter, HTTPException
+from fastapi_cache.decorator import cache
 from pydantic import BaseModel, Field, validator
 import numpy as np
 from ..utils.db_connection import DatabaseConnection
@@ -60,6 +61,7 @@ class QoLDefaultWeights(BaseModel):
     nearestParkDistance: float = 0.2129  # nearest_park_miles
 
 
+@cache()
 @router.get("/defaultWeights", response_model=QoLDefaultWeights)
 def get_default_qol_weights():
     """
