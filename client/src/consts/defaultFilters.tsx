@@ -13,10 +13,12 @@ export const defaultFilters: MapFilter = {
   SearchQuery: "",
   State: ["DC"],
   weights: {
-    Price: 25,
-    AirQualityScore: 25,
-    WalkScore: 25,
-    Review: 25,
+    Price: 20,
+    AirQualityScore: 20,
+    WalkScore: 20,
+    Review: 20,
+    GreenSpace: 10,
+    PublicTransportation: 10,
   },
   useDynamicWeight: false,
 };

@@ -12,7 +12,7 @@ RUN pnpm install --frozen-lockfile
 
 COPY client/ ./
 
-
+ENV VITE_API_BASE_URL=""
 
 RUN pnpm run build
 
@@ -37,7 +37,7 @@ ENV GDAL_CONFIG=/usr/bin/gdal-config
 COPY ./server .
 COPY --from=frontend-builder /app/dist ./dist
 
-RUN uv sync --frozen --no-cache 
+RUN uv sync --frozen --no-cache
 
 # --- Removed mv/sed/cat commands related to creating/populating .env file ---
 # Backend code MUST be adapted to read DB_* variables via os.getenv()

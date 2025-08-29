@@ -11,7 +11,14 @@ interface Props {
 const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose }) => {
   // Helper to sum weights
   const totalWeight = Object.values(filters.weights || {}).reduce((a, b) => a + b, 0);
-  const weightKeys = ["Price", "AirQualityScore", "WalkScore", "Review"] as const;
+  const weightKeys = [
+    "Price",
+    "AirQualityScore",
+    "WalkScore",
+    "Review",
+    "GreenSpace",
+    "PublicTransportation"
+  ] as const;
   type WeightKey = typeof weightKeys[number];
   const handleWeightChange = (key: WeightKey, value: number) => {
     setFilters({
@@ -59,7 +66,15 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose }) => {
             <div className="grid grid-cols-2 gap-4">
               {weightKeys.map((key) => (
                 <div key={key} className="flex flex-col items-center">
-                  <label className="text-sm text-gray-600 mb-1">{key}</label>
+                  <label className="text-sm text-gray-600 mb-1">
+                    {key === "GreenSpace" ? "Green Space"
+                      : key === "PublicTransportation" ? "Public Transportation"
+                      : key === "AirQualityScore" ? "Air Quality"
+                      : key === "WalkScore" ? "Walk Score"
+                      : key === "Review" ? "Google Review"
+                      : key === "Price" ? "Price"
+                      : key}
+                  </label>
                   <input
                     type="number"
                     min={0}

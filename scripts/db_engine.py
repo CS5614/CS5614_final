@@ -11,11 +11,11 @@ logging.basicConfig(
 class DBEngine:
     def __init__(self):
         load_dotenv()
-        self.db_host = os.getenv("DB_HOST")
-        self.db_name = os.getenv("DB_NAME")
-        self.db_user = os.getenv("DB_USER")
-        self.db_password = os.getenv("DB_PASSWORD")
-        self.db_port = int(os.getenv("DB_PORT", "5432"))
+        self.db_host = os.getenv("db_host")
+        self.db_name = os.getenv("db_name")
+        self.db_user = os.getenv("db_user")
+        self.db_password = os.getenv("db_password")
+        self.db_port = int(os.getenv("db_port", "5432"))
 
         if not all(
             [self.db_host, self.db_name, self.db_user, self.db_password, self.db_port]
