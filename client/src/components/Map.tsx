@@ -22,7 +22,7 @@ interface MapProps {
 
 // FIXED: The props are now correctly destructured here
 const Map: React.FC<MapProps> = ({ filters, comparisonList, onToggleCompare }) => {
-  const rentalScores = useContext(RentalScoreContext);
+  const { rentalScores } = useContext(RentalScoreContext);
   const [filteredLocations, setFilteredLocations] = useState<RentalScore[]>([]);
   const [selected, setSelected] = useState<RentalScore | null>(null);
   const [locationsAtPoint, setLocationsAtPoint] = useState<RentalScore[]>([]);
@@ -58,8 +58,6 @@ const Map: React.FC<MapProps> = ({ filters, comparisonList, onToggleCompare }) =
       if (loc.busStopsNumber < (currentFilters.BusStopsNumber ?? 0)) return false;
       if (loc.price > (currentFilters.Price ?? Infinity)) return false;
       if (loc.airQualityScore < (currentFilters.AirQualityScore ?? 0)) return false;
-      if (loc.openStreetNumber < (currentFilters.ParkNumber ?? 0)) return false;
-      if (loc.reviewScore < (currentFilters.Review ?? 0)) return false;
       if (loc.bathroom < (currentFilters.Bathroom ?? 0)) return false;
       if (loc.bedroom < (currentFilters.Bedroom ?? 0)) return false;
       if (currentFilters.SearchQuery) {
