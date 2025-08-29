@@ -24,8 +24,6 @@ export interface MapFilter {
     BusStopsNumber: number;
     Price: number;
     AirQualityScore: number;
-    ParkNumber: number;
-    Review: number;
     Bedroom: number;
     Bathroom: number;
     SearchQuery: string;
@@ -34,9 +32,10 @@ export interface MapFilter {
         Price: number;
         AirQualityScore: number;
         WalkScore: number;
-        Review: number;
-        GreenSpace: number;
-        PublicTransportation: number;
+        NearestBusStopDistance: number;
+        BusStopsNumber: number;
+        OpenStreetNumber: number;
+        NearestParkDistance: number;
     };
     useDynamicWeight: boolean;
 }

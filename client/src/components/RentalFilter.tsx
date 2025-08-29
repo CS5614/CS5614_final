@@ -1,25 +1,130 @@
-import React from "react";
-import { MapFilter } from "../type";
-import { defaultFilters } from "../consts/defaultFilters";
 
-interface Props {
+import React, { useEffect, useState } from "react";
+import { MapFilter, RentalScore } from "../type";
+import { defaultFilters } from "../consts/defaultFilters";
+import httpClient from "../services/httpClient";
+
+type DefaultWeightsResponse = {
+  price: number;
+  airQualityScore: number;
+  walkScore: number;
+  nearestBusStopDistance: number;
+  busStopsNumber: number;
+  openStreetNumber: number;
+  nearestParkDistance: number;
+};
+
+type Props = {
   filters: MapFilter;
   setFilters: React.Dispatch<React.SetStateAction<MapFilter>>;
   onClose?: () => void;
-}
+  onQolUpdate?: (qolScores: RentalScore[]) => void; // callback to update qol scores in parent
+};
 
-const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose }) => {
-  // Helper to sum weights
-  const totalWeight = Object.values(filters.weights || {}).reduce((a, b) => a + b, 0);
+const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose, onQolUpdate }) => {
+  // Backend feature keys
   const weightKeys = [
     "Price",
     "AirQualityScore",
     "WalkScore",
-    "Review",
-    "GreenSpace",
-    "PublicTransportation"
+    "NearestBusStopDistance",
+    "BusStopsNumber",
+    "OpenStreetNumber",
+    "NearestParkDistance"
   ] as const;
   type WeightKey = typeof weightKeys[number];
+
+  // State to track if weights have been modified but not applied
+  const [hasUnappliedChanges, setHasUnappliedChanges] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
+
+  // Helper to sum weights
+  const totalWeight = Object.values(filters.weights || {}).reduce((a: number, b: number) => a + b, 0);
+
+  // Fetch default weights on mount if not set
+  useEffect(() => {
+    if (filters.useDynamicWeight && (!filters.weights || Object.keys(filters.weights).length === 0)) {
+      httpClient.get<DefaultWeightsResponse>("/api/dynamicQol/defaultWeights")
+        .then((response) => {
+          const data = response.data;
+          // Convert backend weights (0-1) to frontend weights (0-100) while preserving proportions
+          const backendWeights = {
+            Price: data.price ?? 0,
+            AirQualityScore: data.airQualityScore ?? 0,
+            WalkScore: data.walkScore ?? 0,
+            NearestBusStopDistance: data.nearestBusStopDistance ?? 0,
+            BusStopsNumber: data.busStopsNumber ?? 0,
+            OpenStreetNumber: data.openStreetNumber ?? 0,
+            NearestParkDistance: data.nearestParkDistance ?? 0,
+          };
+
+          // Scale to 100 and round, then adjust to ensure sum equals 100
+          const scaledWeights: [string, number][] = Object.entries(backendWeights).map(([key, value]) => [
+            key,
+            Math.round(value * 100)
+          ]);
+
+          const currentSum = scaledWeights.reduce((sum, [, value]) => sum + value, 0);
+          const difference = 100 - currentSum;
+
+          // Adjust the largest weight by the difference to make sum exactly 100
+          if (difference !== 0) {
+            const maxIndex = scaledWeights.reduce((maxIdx, [, value], idx) =>
+              value > scaledWeights[maxIdx][1] ? idx : maxIdx, 0);
+            scaledWeights[maxIndex][1] += difference;
+          }
+
+          const finalWeights = Object.fromEntries(scaledWeights) as {
+            Price: number;
+            AirQualityScore: number;
+            WalkScore: number;
+            NearestBusStopDistance: number;
+            BusStopsNumber: number;
+            OpenStreetNumber: number;
+            NearestParkDistance: number;
+          };
+
+          setFilters((f: MapFilter) => ({ ...f, weights: finalWeights }));
+          // Auto-apply default weights when first enabling dynamic weights
+          setHasUnappliedChanges(true);
+        })
+        .catch(console.error);
+    }
+    // eslint-disable-next-line
+  }, [filters.useDynamicWeight]);
+
+  // Reset unapplied changes when dynamic weight toggle changes
+  useEffect(() => {
+    setHasUnappliedChanges(false);
+  }, [filters.useDynamicWeight]);
+
+  // Call dynamic QoL API when Apply button is clicked
+  const applyWeights = async () => {
+    if (filters.useDynamicWeight && filters.weights && totalWeight === 100) {
+      setIsApplying(true);
+      try {
+        // Prepare payload: convert frontend weights (0-100) to backend weights (0-1)
+        const payload: Record<string, number> = {
+          price: (filters.weights.Price ?? 0) / 100,
+          airQualityScore: (filters.weights.AirQualityScore ?? 0) / 100,
+          walkScore: (filters.weights.WalkScore ?? 0) / 100,
+          nearestBusStopDistance: (filters.weights.NearestBusStopDistance ?? 0) / 100,
+          busStopsNumber: (filters.weights.BusStopsNumber ?? 0) / 100,
+          openStreetNumber: (filters.weights.OpenStreetNumber ?? 0) / 100,
+          nearestParkDistance: (filters.weights.NearestParkDistance ?? 0) / 100,
+        };
+
+        const response = await httpClient.post<RentalScore[]>("/api/dynamicQol", payload);
+        if (onQolUpdate) onQolUpdate(response.data);
+        setHasUnappliedChanges(false);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsApplying(false);
+      }
+    }
+  };
+
   const handleWeightChange = (key: WeightKey, value: number) => {
     setFilters({
       ...filters,
@@ -28,7 +133,9 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose }) => {
         [key]: value,
       },
     });
+    setHasUnappliedChanges(true);
   };
+
   return (
     // --- FIXED: Use flexbox to structure the panel ---
     <div className="bg-white h-full flex flex-col">
@@ -67,11 +174,12 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose }) => {
               {weightKeys.map((key) => (
                 <div key={key} className="flex flex-col items-center">
                   <label className="text-sm text-gray-600 mb-1">
-                    {key === "GreenSpace" ? "Green Space"
-                      : key === "PublicTransportation" ? "Public Transportation"
-                      : key === "AirQualityScore" ? "Air Quality"
+                    {key === "AirQualityScore" ? "Air Quality"
                       : key === "WalkScore" ? "Walk Score"
-                      : key === "Review" ? "Google Review"
+                      : key === "NearestBusStopDistance" ? "Nearest Bus Stop (mi)"
+                      : key === "BusStopsNumber" ? "Nearby Bus Stops"
+                      : key === "OpenStreetNumber" ? "Nearby Parks"
+                      : key === "NearestParkDistance" ? "Nearest Park (mi)"
                       : key === "Price" ? "Price"
                       : key}
                   </label>
@@ -100,6 +208,22 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose }) => {
                 <span className="ml-2 text-red-500">(Total must be 100%)</span>
               )}
             </div>
+            <div className="mt-4 text-center">
+              <button
+                onClick={applyWeights}
+                disabled={totalWeight !== 100 || isApplying || !hasUnappliedChanges}
+                className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                  totalWeight === 100 && hasUnappliedChanges && !isApplying
+                    ? "bg-blue-500 text-white hover:bg-blue-600"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
+              >
+                {isApplying ? "Applying..." : "Apply Weights"}
+              </button>
+              {hasUnappliedChanges && totalWeight === 100 && (
+                <p className="text-xs text-orange-600 mt-1">Changes not applied yet</p>
+              )}
+            </div>
           </div>
         )}
         <div className="space-y-4">
@@ -123,13 +247,13 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose }) => {
             </label>
             <div className="flex space-x-4 justify-center">
               <label>
-                <input type="checkbox" name="state" value="DC" checked={filters.State.includes("DC")} onChange={() => setFilters({ ...filters, State: filters.State.includes("DC") ? filters.State.filter((s) => s !== "DC") : [...filters.State, "DC"]})}/> DC
+                <input type="checkbox" name="state" value="DC" checked={filters.State.includes("DC")} onChange={() => setFilters({ ...filters, State: filters.State.includes("DC") ? filters.State.filter((s: string) => s !== "DC") : [...filters.State, "DC"]})}/> DC
               </label>
               <label>
-                <input type="checkbox" name="state" value="VA" checked={filters.State.includes("VA")} onChange={() => setFilters({ ...filters, State: filters.State.includes("VA") ? filters.State.filter((s) => s !== "VA") : [...filters.State, "VA"]})}/> VA
+                <input type="checkbox" name="state" value="VA" checked={filters.State.includes("VA")} onChange={() => setFilters({ ...filters, State: filters.State.includes("VA") ? filters.State.filter((s: string) => s !== "VA") : [...filters.State, "VA"]})}/> VA
               </label>
               <label>
-                <input type="checkbox" name="state" value="MD" checked={filters.State.includes("MD")} onChange={() => setFilters({ ...filters, State: filters.State.includes("MD") ? filters.State.filter((s) => s !== "MD") : [...filters.State, "MD"]})}/> MD
+                <input type="checkbox" name="state" value="MD" checked={filters.State.includes("MD")} onChange={() => setFilters({ ...filters, State: filters.State.includes("MD") ? filters.State.filter((s: string) => s !== "MD") : [...filters.State, "MD"]})}/> MD
               </label>
             </div>
           </div>
@@ -172,11 +296,7 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose }) => {
             <div className="text-sm text-gray-500 text-center">{filters.WalkScore}</div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-600 text-center mb-1">Google Review</label>
-            <input title="Google Review" className="w-full accent-blue-500" type="range" min="0" max="5" value={filters.Review} onChange={(e) => setFilters({ ...filters, Review: Number(e.target.value) })}/>
-            <div className="text-sm text-gray-500 text-center">{filters.Review}</div>
-          </div>
+
         </div>
       </div>
 

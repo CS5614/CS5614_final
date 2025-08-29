@@ -50,6 +50,24 @@ class QoLScore(BaseModel):
 router = APIRouter(prefix="/api/dynamicQol", tags=["dynamicQol"])
 
 
+class QoLDefaultWeights(BaseModel):
+    price: float = 0.0120
+    airQualityScore: float = 0.0525  # aqi
+    walkScore: float = 0.1425  # nwi_score
+    nearestBusStopDistance: float = 0.2114  # nearest_bus_stop_miles
+    busStopsNumber: float = 0.2123  # nearby_bus_stops
+    openStreetNumber: float = 0.1565  # nearby_parks (count)
+    nearestParkDistance: float = 0.2129  # nearest_park_miles
+
+
+@router.get("/defaultWeights", response_model=QoLDefaultWeights)
+def get_default_qol_weights():
+    """
+    Return the default normalized weights (sum ≈ 1.0) for dynamic QoL scoring.
+    """
+    return QoLDefaultWeights()
+
+
 @router.post("", response_model=List[QoLScore])
 def compute_dynamic_qol(weights: QoLWeightRequest):
     """Recalculate QoL scores with custom feature weights sent by frontend."""
