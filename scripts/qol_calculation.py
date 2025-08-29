@@ -1,14 +1,13 @@
-from itertools import count
-
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
-from utils.db_engine import DBEngine
+from db_engine import DBEngine
 
 db = DBEngine()
 engine = db.get_engine()
+
 
 def load_rental_listings():
     load_sql = """
@@ -33,6 +32,7 @@ def load_rental_listings():
 
     rental_units = pd.read_sql(load_sql, engine)
     return rental_units
+
 
 def load_nearest_bus_stops():
     load_sql = """
@@ -61,6 +61,7 @@ def load_nearest_bus_stops():
 
     nearest_bus_stops = pd.read_sql(load_sql, engine)
     return nearest_bus_stops
+
 
 def load_count_bus_stops():
     load_sql = """
@@ -91,6 +92,7 @@ def load_count_bus_stops():
     count_bus_stops = pd.read_sql(load_sql, engine)
     return count_bus_stops
 
+
 def load_count_parks():
     load_sql = """
     SELECT
@@ -118,6 +120,7 @@ def load_count_parks():
     """
     count_parks = pd.read_sql(load_sql, engine)
     return count_parks
+
 
 def load_nearest_parks():
     load_sql = """
@@ -148,7 +151,6 @@ def load_nearest_parks():
     return nearest_parks
 
 
-
 def merge_dataframes():
     rental_df = load_rental_listings()
     nearest_bus_df = load_nearest_bus_stops()
@@ -161,7 +163,6 @@ def merge_dataframes():
     merged_df = merged_df.merge(count_parks_df, on="listing_db_id", how="left")
     merged_df = merged_df.merge(nearest_parks_df, on="listing_db_id", how="left")
     return merged_df
-
 
 
 def compute_qol():
@@ -181,7 +182,7 @@ def compute_qol():
         "nearest_bus_stop_miles",
         "nearby_bus_stops",
         "nearby_parks",
-        "nearest_park_miles"
+        "nearest_park_miles",
     ]
     X = df[features]
 
@@ -201,15 +202,12 @@ def compute_qol():
     pc1 = pca.components_[0]
     abs_loadings = np.abs(pc1)
     weights = abs_loadings / np.sum(abs_loadings)
-
     # Calculate the Quality of Life (QoL) score
-    df_qol = pd.DataFrame({
-        "listing_db_id": df["listing_db_id"],
-        "qol_score": np.dot(df_scaled, weights)
-    })
+    df_qol = pd.DataFrame(
+        {"listing_db_id": df["listing_db_id"], "qol_score": np.dot(df_scaled, weights)}
+    )
 
     return df_qol
-
 
 
 def main():
@@ -221,9 +219,8 @@ def main():
         if_exists="replace",
         index=False,
         method="multi",
-        chunksize=1000
+        chunksize=1000,
     )
-
 
 
 if __name__ == "__main__":

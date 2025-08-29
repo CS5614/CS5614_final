@@ -35,6 +35,8 @@ export interface MapFilter {
         AirQualityScore: number;
         WalkScore: number;
         Review: number;
+        GreenSpace: number;
+        PublicTransportation: number;
     };
     useDynamicWeight: boolean;
 }
