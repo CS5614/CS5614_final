@@ -23,6 +23,8 @@ class QualityOfLifeConverter:
 
     def fetch_rental_scores(self) -> List[Dict]:
         sql_main = """
+        SET LOCAL search_path TO extensions, public;
+        
         WITH RentalBase AS (
           SELECT
             rl.listing_db_id,

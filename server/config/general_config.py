@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     DB_PASSWORD: str
     DB_PORT: int
 
+    # Chatbot API Key
+    OPENAI_API_KEY: str
+
     @property
     def database_url(self) -> PostgresDsn:
         return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"

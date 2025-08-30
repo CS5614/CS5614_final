@@ -5,6 +5,7 @@ import { MapFilter, RentalScore } from "./type";
 import { RentalScoreProvider, RentalScoreContext } from "./contexts/RentalScoreContext";
 import { defaultFilters } from "./consts/defaultFilters";
 import ComparisonPanel from "./components/ComparisonPanel";
+import Chatbot from "./components/Chatbot";
 import "./App.css";
 import httpClient from "./services/httpClient";
 
@@ -14,11 +15,9 @@ const AppContent: React.FC = () => {
   const [comparisonList, setComparisonList] = useState<RentalScore[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Fetch default weights on app startup
   useEffect(() => {
     httpClient.get<any>("/api/dynamicQol/defaultWeights").then((response) => {
       const data = response.data;
-      // Convert backend weights (0-1) to frontend weights (0-100) while preserving proportions
       const backendWeights = {
         Price: data.price ?? 0,
         AirQualityScore: data.airQualityScore ?? 0,
@@ -29,7 +28,6 @@ const AppContent: React.FC = () => {
         NearestParkDistance: data.nearestParkDistance ?? 0,
       };
 
-      // Scale to 100 and round, then adjust to ensure sum equals 100
       const scaledWeights: [string, number][] = Object.entries(backendWeights).map(([key, value]) => [
         key,
         Math.round(value * 100)
@@ -38,7 +36,6 @@ const AppContent: React.FC = () => {
       const currentSum = scaledWeights.reduce((sum, [, value]) => sum + value, 0);
       const difference = 100 - currentSum;
 
-      // Adjust the largest weight by the difference to make sum exactly 100
       if (difference !== 0) {
         const maxIndex = scaledWeights.reduce((maxIdx, [, value], idx) =>
           value > scaledWeights[maxIdx][1] ? idx : maxIdx, 0);
@@ -61,11 +58,10 @@ const AppContent: React.FC = () => {
       }));
     })
     .catch(console.error);
-  }, []);
+  }, [updateQolScores]);
 
-  const handleQolUpdate = async (qolScores: RentalScore[]) => {
+  const handleQolUpdate = (qolScores: RentalScore[]) => {
     try {
-      // Update QoL scores in context
       updateQolScores(qolScores);
       console.log('Dynamic QoL scores updated:', qolScores);
     } catch (error) {
@@ -100,7 +96,6 @@ const AppContent: React.FC = () => {
         </button>
       </div>
 
-      {/* --- FIXED: Set to full height; scrolling is now handled inside RentalFilter --- */}
       <div
         className={`fixed inset-y-0 left-0 z-30 w-80 bg-white shadow-lg transform ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -126,6 +121,7 @@ const AppContent: React.FC = () => {
         onRemove={(propertyId: number) => handleToggleCompare({ id: propertyId } as RentalScore)}
         onClear={handleClearCompare}
       />
+      <Chatbot />
     </div>
   );
 };
