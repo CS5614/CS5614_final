@@ -24,10 +24,18 @@ export interface MapFilter {
     BusStopsNumber: number;
     Price: number;
     AirQualityScore: number;
-    ParkNumber: number;
-    Review: number;
     Bedroom: number;
     Bathroom: number;
     SearchQuery: string;
     State: string[];
+    weights: {
+        Price: number;
+        AirQualityScore: number;
+        WalkScore: number;
+        NearestBusStopDistance: number;
+        BusStopsNumber: number;
+        OpenStreetNumber: number;
+        NearestParkDistance: number;
+    };
+    useDynamicWeight: boolean;
 }

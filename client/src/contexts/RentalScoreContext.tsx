@@ -1,7 +1,16 @@
 import { createContext, useState, useEffect, ReactNode } from "react";
 import { RentalScore } from "../type";
+import httpClient from "../services/httpClient";
 
-export const RentalScoreContext = createContext<RentalScore[]>([]);
+interface RentalScoreContextType {
+  rentalScores: RentalScore[];
+  updateQolScores: (qolUpdates: { id: number; qolScore: number }[]) => void;
+}
+
+export const RentalScoreContext = createContext<RentalScoreContextType>({
+  rentalScores: [],
+  updateQolScores: () => {},
+});
 
 export const RentalScoreProvider: React.FC<{ children: ReactNode }> = ({
   children,
@@ -11,10 +20,8 @@ export const RentalScoreProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const fetchRentalScores = async () => {
       try {
-        const response = await fetch("/api/rentalScore");
-        const data = await response.json();
-        const rentalScores = data as RentalScore[];
-        return rentalScores;
+        const response = await httpClient.get<RentalScore[]>("/api/rentalScore");
+        return response.data;
       } catch (error) {
         console.error("Error fetching rental scores:", error);
       }
@@ -22,8 +29,22 @@ export const RentalScoreProvider: React.FC<{ children: ReactNode }> = ({
     void fetchRentalScores().then((data) => setRentalScores(data!));
   }, []);
 
+  const updateQolScores = (qolUpdates: { id: number; qolScore: number }[]) => {
+    setRentalScores(prevScores =>
+      prevScores.map(score => {
+        const update = qolUpdates.find(u => u.id === score.id);
+        return update ? { ...score, qolScore: update.qolScore } : score;
+      })
+    );
+  };
+
+  const contextValue: RentalScoreContextType = {
+    rentalScores,
+    updateQolScores,
+  };
+
   return (
-    <RentalScoreContext.Provider value={rentalScores}>
+    <RentalScoreContext.Provider value={contextValue}>
       {children}
     </RentalScoreContext.Provider>
   );
