@@ -21,6 +21,17 @@ type Props = {
   onQolUpdate?: (qolScores: RentalScore[]) => void; // callback to update qol scores in parent
 };
 
+
+const featureDisplayNames: Record<WeightKey, string> = {
+    Price: "Price",
+    AirQualityScore: "Air Quality",
+    WalkScore: "Walk Score",
+    NearestBusStopDistance: "Nearest Bus Stop", // 移除了單位 (mi)
+    BusStopsNumber: "Nearby Bus Stops",
+    OpenStreetNumber: "Nearby Parks",
+    NearestParkDistance: "Nearest Park" // 移除了單位 (mi)
+};
+
 const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose, onQolUpdate }) => {
   // Backend feature keys
   const weightKeys = [
@@ -37,6 +48,9 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose, onQolUpda
   // State to track if weights have been modified but not applied
   const [hasUnappliedChanges, setHasUnappliedChanges] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
+
+  // State for negative/positive direction for prices
+  const [priceDirection, setPriceDirection] = useState<'positive' | 'negative'>('negative');
 
   // Helper to sum weights
   const totalWeight = Object.values(filters.weights || {}).reduce((a: number, b: number) => a + b, 0);
@@ -103,22 +117,38 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose, onQolUpda
     if (filters.useDynamicWeight && filters.weights && totalWeight === 100) {
       setIsApplying(true);
       try {
-        // Prepare payload: convert frontend weights (0-100) to backend weights (0-1)
-        const payload: Record<string, number> = {
-          price: (filters.weights.Price ?? 0) / 100,
-          airQualityScore: (filters.weights.AirQualityScore ?? 0) / 100,
-          walkScore: (filters.weights.WalkScore ?? 0) / 100,
-          nearestBusStopDistance: (filters.weights.NearestBusStopDistance ?? 0) / 100,
-          busStopsNumber: (filters.weights.BusStopsNumber ?? 0) / 100,
-          openStreetNumber: (filters.weights.OpenStreetNumber ?? 0) / 100,
-          nearestParkDistance: (filters.weights.NearestParkDistance ?? 0) / 100,
-        };
+        const payload: { [key: string]: any } = {};
+
+        for (const key of Object.keys(filters.weights || {})) {
+          const weightValue = filters.weights[key as WeightKey];
+
+          if (weightValue > 0) { // 只處理權重大於 0 的特徵
+            const backendKey = key.charAt(0).toLowerCase() + key.slice(1);
+
+            if (key === 'Price') {
+              // 對於 Price，組裝成包含 weight 和 direction 的物件
+              payload['price'] = {
+                weight: weightValue,
+                direction: priceDirection
+              };
+            } else {
+              // 對於其他特徵，直接傳遞權重數字
+              payload[backendKey] = weightValue;
+            }
+          }
+        }
+
+        if (Object.keys(payload).length === 0) {
+          console.warn("No weights greater than 0 were provided.");
+          setIsApplying(false);
+          return;
+        }
 
         const response = await httpClient.post<RentalScore[]>("/api/dynamicQol", payload);
         if (onQolUpdate) onQolUpdate(response.data);
         setHasUnappliedChanges(false);
       } catch (error) {
-        console.error(error);
+        console.error("Failed to apply dynamic weights:", error);
       } finally {
         setIsApplying(false);
       }
@@ -169,21 +199,21 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose, onQolUpda
         {/* Dynamic Weights Section (conditionally rendered) */}
         {filters.useDynamicWeight && (
           <div className="mb-6 border rounded-lg p-4 bg-gray-50">
-            <div className="text-center font-semibold text-gray-700 mb-2">Dynamic Score Weights</div>
+            <div className="text-center font-semibold text-gray-700 mb-2">Dynamic Weights</div>
             <div className="grid grid-cols-2 gap-3">
               {weightKeys.map((key) => (
                 <div
                   key={key}
-                  className="flex flex-col items-stretch p-2 rounded bg-white shadow-sm border border-gray-200 min-h-[80px]"
+                  className="flex flex-col items-stretch p-2 rounded bg-white shadow-sm border border-gray-200"
                 >
                   <div className="flex items-start gap-1 mb-1">
-                    <span className="text-[11px] font-medium text-gray-600 leading-tight flex-1">
+                    <span className="text-[10px] font-medium text-gray-600 leading-tight flex-1">
                       {key === "AirQualityScore" ? "Air Quality"
                         : key === "WalkScore" ? "Walk Score"
-                        : key === "NearestBusStopDistance" ? "Nearest Bus Stop (mi)"
+                        : key === "NearestBusStopDistance" ? "Nearest Bus Stop"
                         : key === "BusStopsNumber" ? "Nearby Bus Stops"
                         : key === "OpenStreetNumber" ? "Nearby Parks"
-                        : key === "NearestParkDistance" ? "Nearest Park (mi)"
+                        : key === "NearestParkDistance" ? "Nearest Park"
                         : key === "Price" ? "Price"
                         : key}
                     </span>
@@ -209,6 +239,32 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose, onQolUpda
                       aria-label={`Weight slider for ${key}`}
                     />
                   </div>
+                    {key === 'Price' && (
+                    <div className="mt-1.5 flex items-center justify-around gap-1 text-[10px] text-gray-500">
+                      <label className="cursor-pointer flex items-center gap-1">
+                        <input
+                          type="radio"
+                          name="price-direction"
+                          value="negative"
+                          checked={priceDirection === 'negative'}
+                          onChange={() => { setPriceDirection('negative'); setHasUnappliedChanges(true); }}
+                          className="accent-blue-500 h-2.5 w-2.5"
+                        />
+                        <span>Lower Better</span>
+                      </label>
+                      <label className="cursor-pointer flex items-center gap-1">
+                        <input
+                          type="radio"
+                          name="price-direction"
+                          value="positive"
+                          checked={priceDirection === 'positive'}
+                          onChange={() => { setPriceDirection('positive'); setHasUnappliedChanges(true); }}
+                          className="accent-blue-500 h-2.5 w-2.5"
+                        />
+                        <span>Higher Better</span>
+                      </label>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

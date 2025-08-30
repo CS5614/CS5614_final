@@ -1,6 +1,5 @@
-from typing import Dict, List, Optional
+from typing import Dict, List
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel, Field
 import numpy as np
 import pandas as pd
 import joblib
@@ -8,7 +7,6 @@ import os
 import json
 from functools import lru_cache
 
-from ..utils.database import engine
 from ..config.features_config import FEATURES_CONFIG, DB_COLUMN_NAMES
 from ..models.qol_score import QoLScore
 from ..models.qol_weights_request import QoLWeightRequest
@@ -52,9 +50,9 @@ def get_features_dataframe() -> pd.DataFrame:
 
 # QoL Score Calculation
 @router.post("", response_model=List[QoLScore])
-def compute_dynamic_qol(weights: QoLWeightRequest):
+def compute_dynamic_qol(request_params: QoLWeightRequest):
     try:
-        norm_weights = weights.normalize()
+        processed_params = request_params.normalize()
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -71,13 +69,30 @@ def compute_dynamic_qol(weights: QoLWeightRequest):
     df_scaled = pd.DataFrame(X_scaled, columns=DB_COLUMN_NAMES)
 
     final_feature_matrix, weight_vector = [], []
+
     for feature in FEATURES_CONFIG:
-        if feature.api_name in norm_weights:
+        if feature.api_name in processed_params:
+            params = processed_params[feature.api_name]
             scaled_col = df_scaled[feature.db_col].copy()
-            if feature.invert_score:
+
+            # Adjust the directions
+            need_invert = False
+            if feature.api_name == "price":
+                if params.get("direction") == "negative":
+                    need_invert = True
+
+            else:
+                if feature.invert_score:
+                    need_invert = True
+
+            if need_invert:
                 scaled_col *= -1
+
             final_feature_matrix.append(scaled_col)
-            weight_vector.append(norm_weights[feature.api_name])
+            weight_vector.append(params["weight"])
+
+    if not weight_vector:
+         raise HTTPException(status_code=400, detail="No valid feature weights provided.")
 
     final_feature_matrix = np.array(final_feature_matrix).T
     weight_vector = np.array(weight_vector)
