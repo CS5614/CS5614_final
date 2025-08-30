@@ -2,11 +2,14 @@ import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+
 from .routes.rental_score import router as rental_score_router
 from .routes.bus_stop_list import router as bus_list_router
 from .routes.park_list import router as park_list_router
 from .routes.get_config import router as config_router
 from .routes.dynamic_qol import router as dynamic_qol_router
+from .routes.chatbot_route import router as chatbot_router
+
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
@@ -38,6 +41,7 @@ def create_app() -> FastAPI:
     app.include_router(park_list_router)
     app.include_router(config_router)
     app.include_router(dynamic_qol_router)
+    app.include_router(chatbot_router)
 
     # switch CORS settings based on environment
     if settings.APP_ENV == "development":

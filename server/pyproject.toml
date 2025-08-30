@@ -15,4 +15,8 @@ dependencies = [
     "sqlalchemy>=2.0.43",
     "pydantic-settings>=2.10.1",
     "joblib>=1.5.2",
+    "langchain-community>=0.3.29",
+    "langchain-openai>=0.3.32",
+    "langgraph>=0.6.6",
+    "langchain-core>=0.3.75",
 ]
