@@ -214,14 +214,14 @@ def compute_qol():
 def main():
     df_qol = compute_qol()
     # Save the QoL scores to the database
-    df_qol.to_sql(
-        "listings_qol",
-        engine,
-        if_exists="replace",
-        index=False,
-        method="multi",
-        chunksize=1000,
-    )
+    # df_qol.to_sql(
+    #     "listings_qol",
+    #     engine,
+    #     if_exists="replace",
+    #     index=False,
+    #     method="multi",
+    #     chunksize=1000,
+    # )
 
 
 if __name__ == "__main__":
