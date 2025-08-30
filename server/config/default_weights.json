@@ -1,0 +1,9 @@
+{
+  "price": 0.0106,
+  "airQualityScore": 0.0538,
+  "walkScore": 0.1415,
+  "nearestBusStopDistance": 0.21,
+  "busStopsNumber": 0.2125,
+  "nearestParkDistance": 0.2106,
+  "openStreetNumber": 0.161
+}
