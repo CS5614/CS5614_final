@@ -2,8 +2,10 @@ from typing import Dict, List, Optional
 from fastapi import APIRouter, HTTPException
 from fastapi_cache.decorator import cache
 from pydantic import BaseModel, Field, validator
+from sklearn.preprocessing import StandardScaler
 import numpy as np
-from ..utils.db_connection import DatabaseConnection
+from ..utils.db_engine import DBEngine
+import pandas as pd
 import math
 
 
@@ -75,6 +77,7 @@ def compute_dynamic_qol(weights: QoLWeightRequest):
     """Recalculate QoL scores with custom feature weights sent by frontend."""
     try:
         norm_weights = weights.normalized()
+        print("Normalized weights:", norm_weights)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -145,9 +148,6 @@ def compute_dynamic_qol(weights: QoLWeightRequest):
     )
     """
 
-    # For distance features we will invert later (closer is better)
-    invert_features = {"nearestBusStopDistance", "nearestParkDistance"}
-
     # Determine which joins/CTEs matter (CTEs are always present; we just select columns)
     source_map = {
         "airQualityScore": 'rb."airQualityScore"',
@@ -169,37 +169,37 @@ def compute_dynamic_qol(weights: QoLWeightRequest):
         + ", ".join(select_cols)
         + "\nFROM RentalBase rb\nLEFT JOIN NearestBus nb ON rb.listing_db_id = nb.listing_db_id\nLEFT JOIN BusStopCount bsc ON rb.listing_db_id = bsc.listing_db_id\nLEFT JOIN ParkCount pc ON rb.listing_db_id = pc.listing_db_id\nLEFT JOIN NearestPark np ON rb.listing_db_id = np.listing_db_id\nORDER BY rb.listing_db_id;"
     )
+    db = DBEngine()
+    engine = db.get_engine()
+    df = pd.read_sql(sql, engine)
+    print(df.columns)
 
-    try:
-        with DatabaseConnection() as conn:
-            with conn.cursor() as cur:
-                cur.execute(sql)
-                rows = cur.fetchall()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database query failed: {e}")
-
-    if not rows:
+    if df.empty:
         return []
+    # Log transforms
+    df["price"] = np.log1p(df["price"])
+    df["nearestBusStopDistance"] = np.log1p(df["nearestBusStopDistance"])
+    df["busStopsNumber"] = np.log1p(df["busStopsNumber"])
+    df["nearestParkDistance"] = np.log1p(df["nearestParkDistance"])
 
-    # Build arrays for weighted score
-    # rows come back as tuples in column order we built: id + active feature columns in same sequence
-    ids = [r[0] for r in rows]
-    # Build matrix by slicing row elements 1.. for each row
-    feature_matrix: List[List[float]] = []
-    for r in rows:
-        values = []
-        for idx, feat in enumerate(active_features):
-            val = float(r[1 + idx])
-            if feat in invert_features:
-                val = -val
-            values.append(val)
-        feature_matrix.append(values)
+    # features
+    features = df.columns.tolist()[1:]
+    X = df[features]
 
-    feature_matrix = np.array(feature_matrix)
-    weight_vector = np.array([norm_weights[f] for f in active_features])
-    feature_matrix_np = np.array(feature_matrix)
-    raw_scores = feature_matrix_np.dot(weight_vector)
+    # Standardize the features
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+    df_scaled = pd.DataFrame(X_scaled, columns=features, index=df.index)
 
+    # Invert direction of the features
+    df_scaled["airQualityScore"] *= -1
+    df_scaled["nearestBusStopDistance"] *= -1
+    df_scaled["nearestParkDistance"] *= -1
+
+    weight_vector = np.array([v for v in norm_weights.values()])
+    feature_matrix = np.array(df_scaled)
+    raw_scores = feature_matrix.dot(weight_vector)
+    ids = df["id"].tolist()
     # Min-max normalize to 0-100
     mn, mx = raw_scores.min(), raw_scores.max()
     if mx == mn:
