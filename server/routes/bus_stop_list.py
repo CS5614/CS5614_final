@@ -37,7 +37,11 @@ async def get_bus_stops_within_miles(listing_id: str) -> Dict:
                     )
 
         return records
+    except HTTPException as http_exc:
+        # 直接拋出 HTTPException，讓 FastAPI 處理
+        raise http_exc
     except Exception as e:
+        # 對於其他所有非預期的錯誤，回傳 500
         raise HTTPException(
-            status_code=500, detail=f"Error fetching bus stops: {str(e)}"
+            status_code=500, detail=f"Error fetching parks : {str(e)}"
         )
