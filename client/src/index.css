@@ -72,8 +72,22 @@ button:focus-visible {
   a:hover {
     color: #747bff;
   }
+}
 
-  button {
-    background-color: #f9f9f9;
+@media (prefers-color-scheme: dark) {
+  .gm-style {
+    color-scheme: light !important;
+  }
+
+  /* 兩種實作都保險處理一下 icon 顏色 */
+  .gm-style .gm-ui-hover-effect img {
+    filter: none !important;
+    opacity: 1 !important;
+  }
+  .gm-style .gm-ui-hover-effect svg {
+    color: #111 !important;
+  }
+  .gm-style .gm-ui-hover-effect svg path {
+    fill: #111 !important;
   }
 }
