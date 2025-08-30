@@ -1,8 +1,18 @@
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
+import joblib
+import os
+import sys
+
+# Add the parent directory to the sys.path
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+sys.path.append(PROJECT_ROOT)
+
+
 from server.utils.database import engine
+from server.config.features_config import FEATURES_CONFIG, DB_COLUMN_NAMES
 
 def load_rental_listings():
     load_sql = """
@@ -140,78 +150,42 @@ def load_count_parks():
     """
     return pd.read_sql(load_sql, engine)
 
-
-def merge_dataframes():
+def merge_dataframes() -> pd.DataFrame:
     rental_df = load_rental_listings()
     nearest_bus_df = load_nearest_bus_stops()
     count_bus_df = load_count_bus_stops()
-    count_parks_df = load_count_parks()
-    nearest_parks_df = load_nearest_parks()
-    # Merge all dataframes on listing_db_id
+    nearest_park_df = load_nearest_parks()
+    count_park_df = load_count_parks()
+
+    # Merge all dataframes
     merged_df = rental_df.merge(nearest_bus_df, on="listing_db_id", how="left")
     merged_df = merged_df.merge(count_bus_df, on="listing_db_id", how="left")
-    merged_df = merged_df.merge(count_parks_df, on="listing_db_id", how="left")
-    merged_df = merged_df.merge(nearest_parks_df, on="listing_db_id", how="left")
+    merged_df = merged_df.merge(nearest_park_df, on="listing_db_id", how="left")
+    merged_df = merged_df.merge(count_park_df, on="listing_db_id", how="left")
+
+    merged_df.fillna(0, inplace=True)
     return merged_df
 
 
-def compute_qol():
-    # Load the data
-    df = merge_dataframes()
-
-    # Log transforms
-    df["price"] = np.log1p(df["price"])
-    df["nearest_bus_stop_miles"] = np.log1p(df["nearest_bus_stop_miles"])
-    df["nearby_bus_stops"] = np.log1p(df["nearby_bus_stops"])
-    df["nearest_park_miles"] = np.log1p(df["nearest_park_miles"])
-
-    # features
-    features = [
-        "price",
-        "aqi",
-        "nwi_score",
-        "nearest_bus_stop_miles",
-        "nearby_bus_stops",
-        "nearby_parks",
-        "nearest_park_miles",
-    ]
-    X = df[features]
-
-    # Standardize the features
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-    df_scaled = pd.DataFrame(X_scaled, columns=features, index=df.index)
-
-    # Invert direction of the features
-    df_scaled["aqi"] *= -1
-    df_scaled["nearest_bus_stop_miles"] *= -1
-    df_scaled["nearest_park_miles"] *= -1
-
-    # Perform PCA
-    pca = PCA(n_components=len(features))
-    pca.fit(df_scaled)
-    pc1 = pca.components_[0]
-    abs_loadings = np.abs(pc1)
-    weights = abs_loadings / np.sum(abs_loadings)
-    # Calculate the Quality of Life (QoL) score
-    df_qol = pd.DataFrame(
-        {"listing_db_id": df["listing_db_id"], "qol_score": np.dot(df_scaled, weights)}
-    )
-
-    return df_qol
-
-
 def main():
-    df_qol = compute_qol()
-    # Save the QoL scores to the database
-    df_qol.to_sql(
-        "listings_qol",
-        engine,
-        if_exists="replace",
-        index=False,
-        method="multi",
-        chunksize=1000,
-    )
+    df = merge_dataframes()
+    if df.empty:
+        raise Exception("No data found")
+
+    # Log Transformation
+    for feature in FEATURES_CONFIG:
+        if feature.apply_log:
+            df[feature.db_col] = np.log1p(df[feature.db_col])
+
+    X = df[DB_COLUMN_NAMES]
+    scaler = StandardScaler()
+    scaler.fit(X)
+
+    output_dir = os.path.join(PROJECT_ROOT, "server", "ml_models")
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, "scaler.gz")
+    joblib.dump(scaler, output_path)
+    print(f"Scaler saved to {output_path}")
 
 
 if __name__ == "__main__":

@@ -4,6 +4,9 @@ from pydantic import AnyHttpUrl, PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent.parent  # -> server/
+ENV_FILE = BASE_DIR / ".env"                       # -> server/.env
+
 class Settings(BaseSettings):
     """
     應用程式設定類別，使用 Pydantic BaseSettings 進行管理。
@@ -36,7 +39,7 @@ class Settings(BaseSettings):
         return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     model_config = SettingsConfigDict(
-        env_file=os.path.join(os.path.dirname(__file__), ".env"),
+        env_file=str(ENV_FILE),
         env_file_encoding="utf-8",
         extra="ignore"
     )

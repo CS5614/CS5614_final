@@ -864,6 +864,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "fastapi", extra = ["standard"] },
     { name = "fastapi-cache2" },
+    { name = "joblib" },
     { name = "numpy" },
     { name = "pandas" },
     { name = "psycopg2-binary" },
@@ -877,6 +878,7 @@ dependencies = [
 requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.12" },
     { name = "fastapi-cache2", specifier = ">=0.2.2" },
+    { name = "joblib", specifier = ">=1.5.2" },
     { name = "numpy", specifier = ">=1.26.0" },
     { name = "pandas", specifier = ">=2.3.2" },
     { name = "psycopg2-binary", specifier = ">=2.9.10" },

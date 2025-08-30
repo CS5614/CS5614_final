@@ -1,7 +1,7 @@
 import psycopg2
 import logging
 
-from ..config import settings
+from server.config.general_config import settings
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 

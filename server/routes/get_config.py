@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from fastapi_cache.decorator import cache
-from ..config import settings
+from server.config.general_config import settings
 
 router = APIRouter()
 

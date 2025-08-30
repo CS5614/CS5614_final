@@ -1,4 +1,5 @@
 import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from .routes.rental_score import router as rental_score_router
@@ -10,24 +11,37 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
 
-# 1. 從 config.py 匯入 settings 實例，作為唯一的設定來源
-from .config import settings
+# import environment settings
+from server.config.general_config import settings
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # --- Application start ---
+    print("Application startup...")
+    # Use settings to configure cache
+    FastAPICache.init(InMemoryBackend(), prefix=settings.CACHE_PREFIX)
+    yield
+    print("Application shutdown...")
 
 def create_app() -> FastAPI:
-    # 2. 使用 settings 物件中的值來初始化 FastAPI
-    app = FastAPI(title=settings.PROJECT_NAME, version=settings.API_VERSION)
+    # use settings and lifespan to manage FastAPI app
+    app = FastAPI(
+        title=settings.PROJECT_NAME,
+        version=settings.API_VERSION,
+        lifespan=lifespan  # register lifespan
+    )
 
-    # 包含所有路由
+    # include all routers
     app.include_router(rental_score_router)
     app.include_router(bus_list_router)
     app.include_router(park_list_router)
     app.include_router(config_router)
     app.include_router(dynamic_qol_router)
 
-    # 3. 根據 settings.APP_ENV 環境變數來決定執行的邏輯
+    # switch CORS settings based on environment
     if settings.APP_ENV == "development":
         print("Running in development mode 🚀")
-        # 開發模式下，CORS 允許所有來源
         app.add_middleware(
             CORSMiddleware,
             allow_origins=["*"],
@@ -37,25 +51,17 @@ def create_app() -> FastAPI:
         )
     else: # Production mode
         print("Running in production mode 🏭")
-        # 正式環境下，使用 settings 中定義的嚴格來源列表
         app.add_middleware(
             CORSMiddleware,
-            # 確保 settings.CORS_ORIGINS 是列表才傳入
             allow_origins=settings.CORS_ORIGINS if isinstance(settings.CORS_ORIGINS, list) else [],
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
         )
-        # 只有在正式環境下才掛載前端靜態檔案
+        # serve static files in production
         app.mount("/", StaticFiles(directory="dist", html=True), name="client")
-
-    # FastAPI 啟動事件
-    @app.on_event("startup")
-    async def _init_cache():
-        # 4. 使用 settings 物件中的值來初始化快取
-        FastAPICache.init(InMemoryBackend(), prefix=settings.CACHE_PREFIX)
 
     return app
 
-# 建立 app 實例
+# create the FastAPI app instance
 app = create_app()
