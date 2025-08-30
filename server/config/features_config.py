@@ -9,7 +9,7 @@ class Feature:
 
 # --- Feature config defined base on PCA scripts ---
 FEATURES_CONFIG = [
-    Feature(api_name="price", db_col="price", apply_log=True),
+    Feature(api_name="price", db_col="price", apply_log=True, invert_score=True),
     Feature(api_name="airQualityScore", db_col="aqi", invert_score=True),
     Feature(api_name="walkScore", db_col="nwi_score"),
     Feature(api_name="nearestBusStopDistance", db_col="nearest_bus_stop_miles", invert_score=True, apply_log=True),
