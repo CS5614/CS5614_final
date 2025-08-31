@@ -34,14 +34,22 @@ RUN apt-get update && \
 
 ENV GDAL_CONFIG=/usr/bin/gdal-config
 
-COPY ./server .
-COPY --from=frontend-builder /app/dist ./dist
+# Preserve package structure so imports like `from server.config...` work
+COPY ./server /app/server
+# Place built frontend inside the server package so relative 'dist' path works
+COPY --from=frontend-builder /app/dist /app/server/dist
 
+# Install Python dependencies (pyproject.toml is inside /app/server)
+WORKDIR /app/server
 RUN uv sync --frozen --no-cache
+# Keep runtime working directory at project (server) root for uv to find pyproject
 
 # --- Removed mv/sed/cat commands related to creating/populating .env file ---
 # Backend code MUST be adapted to read DB_* variables via os.getenv()
+ENV APP_ENV=production
+ENV CORS_ORIGINS=*
 
 # Kept original ENTRYPOINT/CMD - BUT likely needs changing for Render
 ENTRYPOINT ["uv"]
-CMD ["run", "fastapi", "run"]
+# Run using uvicorn directly (fastapi CLI not installed by default)
+CMD ["run", "uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "8000"]
