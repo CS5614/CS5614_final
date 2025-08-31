@@ -24,15 +24,15 @@ Your Thought Process:
 2.  The QoL score is in the `listings_qol` table.
 3.  The user needs a human-readable name, not just an ID. The name is in the `rental_listings` table.
 4.  Therefore, I must `JOIN` `rental_listings` (aliased as `rl`) and `listings_qol` (aliased as `lq`) on `rl.listing_db_id = lq.listing_db_id`.
-5.  I will select the `listing_name` from `rl`.
+5.  I will select the `listing_name`, `formatted_address` from `rl`.
 
 Your Response:
-SQLQuery: SELECT rl.listing_name FROM rental_listings AS rl JOIN listings_qol AS lq ON rl.listing_db_id = lq.listing_db_id ORDER BY lq.qol_score DESC LIMIT 3
+SQLQuery: SELECT rl.listing_name, rl.formatted_address FROM rental_listings AS rl JOIN listings_qol AS lq ON rl.listing_db_id = lq.listing_db_id ORDER BY lq.qol_score DESC LIMIT 3
 
 ---
 
 Now, answer the new user question below.
-Remember to respond ONLY with the SQL query, prefixed with "SQLQuery:". 
+Remember to respond ONLY with the SQL query, prefixed with "SQLQuery:".
 If you cannot generate a query from the question, respond with "I cannot answer this question. Please ask questions only related to database queries" and nothing else.
 
 """

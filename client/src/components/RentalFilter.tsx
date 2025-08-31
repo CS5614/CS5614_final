@@ -22,15 +22,10 @@ type Props = {
 };
 
 
-const featureDisplayNames: Record<WeightKey, string> = {
-    Price: "Price",
-    AirQualityScore: "Air Quality",
-    WalkScore: "Walk Score",
-    NearestBusStopDistance: "Nearest Bus Stop", // 移除了單位 (mi)
-    BusStopsNumber: "Nearby Bus Stops",
-    OpenStreetNumber: "Nearby Parks",
-    NearestParkDistance: "Nearest Park" // 移除了單位 (mi)
-};
+// Backend feature keys
+
+// If featureDisplayNames is needed elsewhere, uncomment and use:
+// const featureDisplayNames: Record<WeightKey, string> = { ... };
 
 const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose, onQolUpdate }) => {
   // Backend feature keys

@@ -204,18 +204,20 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
               <a {...props} target="_blank" rel="noreferrer" className="underline break-words" />
             ),
             // inline code & block code 保持原樣
-            code: ({ inline, className, children, ...props }) =>
-              inline ? (
-                <code className="px-1 py-0.5 rounded bg-black/10 dark:bg-white/10 break-words" {...props}>
+            code: (props) => {
+              const { inline, className, children, ...rest } = props as any;
+              return inline ? (
+                <code className="px-1 py-0.5 rounded bg-black/10 dark:bg-white/10 break-words" {...rest}>
                   {children}
                 </code>
               ) : (
                 <pre className="overflow-x-auto rounded-lg p-3 bg-black/80 text-white text-xs">
-                  <code className={className} {...props}>
+                  <code className={className} {...rest}>
                     {children}
                   </code>
                 </pre>
-              ),
+              );
+            },
             // 段落與列表也套用換行/斷詞
             p: (p) => <p className="mb-2 break-words whitespace-pre-wrap">{p.children}</p>,
             li: (p) => <li className="break-words whitespace-pre-wrap">{p.children}</li>,
