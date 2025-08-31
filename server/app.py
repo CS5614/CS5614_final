@@ -19,13 +19,13 @@ from server.config.general_config import settings
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app_instance: FastAPI):
     # --- Application start ---
-    print("Application startup...")
+    print(f"Application startup... {app_instance.title}")
     # Use settings to configure cache
     FastAPICache.init(InMemoryBackend(), prefix=settings.CACHE_PREFIX)
     yield
-    print("Application shutdown...")
+    print(f"Application shutdown... {app_instance.title}")
 
 def create_app() -> FastAPI:
     # use settings and lifespan to manage FastAPI app
@@ -55,10 +55,26 @@ def create_app() -> FastAPI:
         )
     else: # Production mode
         print("Running in production mode 🏭")
+        # Build allowed origins list from settings:
+        # - If value is "*" (string) allow all (credentials disabled automatically)
+        # - If comma-separated string, split
+        # - If already list, use directly
+        raw_origins = settings.CORS_ORIGINS
+        if isinstance(raw_origins, str):
+            if raw_origins.strip() == "*":
+                allow_origins = ["*"]
+                allow_credentials = False  # Wildcard + credentials not allowed by spec
+            else:
+                allow_origins = [o.strip() for o in raw_origins.split(",") if o.strip()]
+                allow_credentials = True
+        else:  # list
+            allow_origins = raw_origins
+            allow_credentials = True if "*" not in allow_origins else False
+
         app.add_middleware(
             CORSMiddleware,
-            allow_origins=settings.CORS_ORIGINS if isinstance(settings.CORS_ORIGINS, list) else [],
-            allow_credentials=True,
+            allow_origins=allow_origins,
+            allow_credentials=allow_credentials,
             allow_methods=["*"],
             allow_headers=["*"],
         )
@@ -67,5 +83,7 @@ def create_app() -> FastAPI:
 
     return app
 
-# create the FastAPI app instance
-app = create_app()
+# create the FastAPI app instance (exported as 'app' for uvicorn target)
+application = create_app()
+# Backwards alias for existing imports expecting 'app'
+app = application
