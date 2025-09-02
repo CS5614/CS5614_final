@@ -17,7 +17,6 @@ from fastapi_cache.backends.inmemory import InMemoryBackend
 # import environment settings
 from server.config.general_config import settings
 
-
 @asynccontextmanager
 async def lifespan(app_instance: FastAPI):
     # --- Application start ---

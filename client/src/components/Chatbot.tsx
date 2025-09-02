@@ -13,11 +13,13 @@ type ChatbotProps = {
 };
 
 function normalizeMarkdown(md: string): string {
-  const t = md?.trim() ?? "";
+  // 用 trimEnd() 移除字串尾端多餘的換行/空白（解決訊息最後多一個換行）
+  const t = (md ?? "").trimEnd();
   const fence = "```";
   if (t.startsWith(fence) && t.endsWith(fence) && t.slice(3).includes("\n")) {
     const withoutStart = t.replace(/^```[a-zA-Z0-9_-]*\s*/, "");
-    return withoutStart.replace(/\s*```$/, "").trim();
+    // 這裡也用 trimEnd()，避免程式碼區塊結尾多出空行
+    return withoutStart.replace(/\s*```$/, "").trimEnd();
   }
   return t;
 }
@@ -27,7 +29,6 @@ export default function Chatbot({
   initialAssistantMessage = [
     "Hello!",
     "You’re chatting with QoLScope Assistant.",
-    "",
     "How can I help you today?",
   ].join("\n"),
 }: ChatbotProps) {
@@ -106,17 +107,17 @@ export default function Chatbot({
           className="fixed bottom-4 right-4 w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg hover:bg-blue-700"
           aria-label="Open chat"
           title="Open chat"
+          style={{ backgroundColor: "#1E3050" }}
         >
           {/* Chat bubble SVG */}
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M21 12c0 4.418-4.03 8-9 8-1.05 0-2.06-.16-3-.45L3 21l1.45-4C3.16 15.06 3 14.05 3 13 3 8.582 7.03 5 12 5s9 3.582 9 7Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinejoin="round"
-            />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 640 640">
+          <path fill="#ffffff" d="M64 304C64 358.4 83.3 408.6 115.9 448.9L67.1 538.3C65.1 542 64 546.2 64 550.5C64 564.6 75.4 576 89.5 576C93.5 576 97.3 575.4 101 573.9L217.4 524C248.8 536.9 283.5 544 320 544C461.4 544 576 436.5 576 304C576 171.5 461.4 64 320 64C178.6 64 64 171.5 64 304zM158 471.9C167.3 454.8 165.4 433.8 153.2 418.7C127.1 386.4 112 346.8 112 304C112 200.8 202.2 112 320 112C437.8 112 528 200.8 528 304C528 407.2 437.8 496 320 496C289.8 496 261.3 490.1 235.7 479.6C223.8 474.7 210.4 474.8 198.6 479.9L140 504.9L158 471.9zM208 336C225.7 336 240 321.7 240 304C240 286.3 225.7 272 208 272C190.3 272 176 286.3 176 304C176 321.7 190.3 336 208 336zM352 304C352 286.3 337.7 272 320 272C302.3 272 288 286.3 288 304C288 321.7 302.3 336 320 336C337.7 336 352 321.7 352 304zM432 336C449.7 336 464 321.7 464 304C464 286.3 449.7 272 432 272C414.3 272 400 286.3 400 304C400 321.7 414.3 336 432 336z"/>
           </svg>
-        </button>
+         </button>
       )}
 
       {/* Chat Window */}
@@ -156,7 +157,7 @@ export default function Chatbot({
           <div className="p-3 border-t dark:border-neutral-700 flex gap-2 items-end">
             <textarea
               ref={textareaRef}
-              placeholder="Type your message... (Shift+Enter for new line)"
+              placeholder="Type your message..."
               value={input}
               onChange={(e) => {
                 setInput(e.target.value);
@@ -219,10 +220,10 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
               );
             },
             // 段落與列表也套用換行/斷詞
-            p: (p) => <p className="mb-2 break-words whitespace-pre-wrap">{p.children}</p>,
+            p: (p) => <p className="mb-2 last:mb-0 break-words whitespace-pre-wrap">{p.children}</p>,
             li: (p) => <li className="break-words whitespace-pre-wrap">{p.children}</li>,
-            ul: (props) => <ul className="list-disc pl-5 space-y-1">{props.children}</ul>,
-            ol: (props) => <ol className="list-decimal pl-5 space-y-1">{props.children}</ol>,
+            ul: (props) => <ul className="list-disc pl-5 space-y-1 last:mb-0">{props.children}</ul>,
+            ol: (props) => <ol className="list-decimal pl-5 space-y-1 last:mb-0">{props.children}</ol>,
             h1: (p) => <h1 className="text-xl font-bold mb-2 break-words">{p.children}</h1>,
             h2: (p) => <h2 className="text-lg font-bold mb-2 break-words">{p.children}</h2>,
             h3: (p) => <h3 className="text-base font-bold mb-1 break-words">{p.children}</h3>,

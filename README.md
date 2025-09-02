@@ -31,9 +31,7 @@ uv run import.py
 
 ### Use docker(recommended)
 ```bash
-
-docker build -t qolscope-app . 
-
+docker build --secret id=openai_api_key,src=.env -t qolscope-app . 
 docker run -p 8000:8000 qolscope
 ```
 
