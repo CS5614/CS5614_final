@@ -24,7 +24,6 @@ SQLQuery: SELECT rl.listing_name, rl.formatted_address FROM rental_listings AS r
 ---
 Now, answer the new user question below. Respond ONLY with the SQL query, prefixed with "SQLQuery:".
 """
-
     return ChatPromptTemplate.from_messages(
         [
             ("system", template),

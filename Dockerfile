@@ -16,6 +16,30 @@ ENV VITE_API_BASE_URL=""
 
 RUN pnpm run build
 
+# RAG Builder
+FROM python:3.12-slim AS rag-builder
+
+# Install uv, just like in the final stage
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+WORKDIR /app/server
+
+# Copy only the necessary files to install dependencies
+COPY ./server/pyproject.toml ./server/uv.lock* ./
+RUN uv sync --frozen --no-cache
+
+# Copy the knowledge base source and the script to build the index
+COPY ./server/knowledge.jsonl ./
+COPY ./server/create_vector_store.py ./
+
+# This is the crucial step: Run the script to generate the faiss_index.
+# We use Docker secrets to securely pass the API key during the build process.
+# This key will NOT be stored in the final image layer.
+RUN --mount=type=secret,id=openai_api_key \
+    OPENAI_API_KEY=$(cat /run/secrets/openai_api_key) python create_vector_store.py
+
+# After this stage, a /app/server/faiss_index directory will be created and ready.
+
 # Python FastAPI server
 FROM python:3.12-slim
 
