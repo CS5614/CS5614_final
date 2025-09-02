@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import Map from "./components/Map";
 import RentalFilter from "./components/RentalFilter";
 import { MapFilter, RentalScore } from "./type";
@@ -7,7 +7,6 @@ import { defaultFilters } from "./consts/defaultFilters";
 import ComparisonPanel from "./components/ComparisonPanel";
 import Chatbot from "./components/Chatbot";
 import "./App.css";
-import httpClient from "./services/httpClient";
 
 const AppContent: React.FC = () => {
   const { updateQolScores } = useContext(RentalScoreContext);
@@ -15,50 +14,9 @@ const AppContent: React.FC = () => {
   const [comparisonList, setComparisonList] = useState<RentalScore[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    httpClient.get<any>("/api/dynamicQol/defaultWeights").then((response) => {
-      const data = response.data;
-      const backendWeights = {
-        Price: data.price ?? 0,
-        AirQualityScore: data.airQualityScore ?? 0,
-        WalkScore: data.walkScore ?? 0,
-        NearestBusStopDistance: data.nearestBusStopDistance ?? 0,
-        BusStopsNumber: data.busStopsNumber ?? 0,
-        OpenStreetNumber: data.openStreetNumber ?? 0,
-        NearestParkDistance: data.nearestParkDistance ?? 0,
-      };
-
-      const scaledWeights: [string, number][] = Object.entries(backendWeights).map(([key, value]) => [
-        key,
-        Math.round(value * 100)
-      ]);
-
-      const currentSum = scaledWeights.reduce((sum, [, value]) => sum + value, 0);
-      const difference = 100 - currentSum;
-
-      if (difference !== 0) {
-        const maxIndex = scaledWeights.reduce((maxIdx, [, value], idx) =>
-          value > scaledWeights[maxIdx][1] ? idx : maxIdx, 0);
-        scaledWeights[maxIndex][1] += difference;
-      }
-
-      const finalWeights = Object.fromEntries(scaledWeights) as {
-        Price: number;
-        AirQualityScore: number;
-        WalkScore: number;
-        NearestBusStopDistance: number;
-        BusStopsNumber: number;
-        OpenStreetNumber: number;
-        NearestParkDistance: number;
-      };
-
-      setFilters(prevFilters => ({
-        ...prevFilters,
-        weights: finalWeights
-      }));
-    })
-    .catch(console.error);
-  }, [updateQolScores]);
+  // Remove this useEffect that was overriding user-set weights
+  // The weights initialization is now handled only in RentalFilter.tsx
+  // when useDynamicWeight is first enabled
 
   const handleQolUpdate = (qolScores: RentalScore[]) => {
     try {

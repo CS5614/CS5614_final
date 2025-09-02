@@ -43,6 +43,8 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose, onQolUpda
   // State to track if weights have been modified but not applied
   const [hasUnappliedChanges, setHasUnappliedChanges] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
+  // Track if we've already initialized default weights to prevent overriding user changes
+  const [hasInitializedWeights, setHasInitializedWeights] = useState(false);
 
   // State for negative/positive direction for prices
   const [priceDirection, setPriceDirection] = useState<'positive' | 'negative'>('negative');
@@ -50,9 +52,9 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose, onQolUpda
   // Helper to sum weights
   const totalWeight = Object.values(filters.weights || {}).reduce((a: number, b: number) => a + b, 0);
 
-  // Fetch default weights on mount if not set
+  // Fetch default weights only when dynamic weight is first enabled and we haven't initialized weights yet
   useEffect(() => {
-    if (filters.useDynamicWeight && (!filters.weights || Object.keys(filters.weights).length === 0)) {
+    if (filters.useDynamicWeight && !hasInitializedWeights && (!filters.weights || Object.keys(filters.weights).length === 0 || Object.values(filters.weights).every(w => w === 0))) {
       httpClient.get<DefaultWeightsResponse>("/api/dynamicQol/defaultWeights")
         .then((response) => {
           const data = response.data;
@@ -94,17 +96,24 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose, onQolUpda
           };
 
           setFilters((f: MapFilter) => ({ ...f, weights: finalWeights }));
+          setHasInitializedWeights(true);
           // Auto-apply default weights when first enabling dynamic weights
           setHasUnappliedChanges(true);
         })
         .catch(console.error);
+    } else if (filters.useDynamicWeight && filters.weights && Object.keys(filters.weights).length > 0) {
+      // If weights already exist when enabling dynamic weights, mark as initialized
+      setHasInitializedWeights(true);
     }
     // eslint-disable-next-line
-  }, [filters.useDynamicWeight]);
+  }, [filters.useDynamicWeight, hasInitializedWeights]);
 
-  // Reset unapplied changes when dynamic weight toggle changes
+  // Reset unapplied changes and initialization state when dynamic weight toggle changes
   useEffect(() => {
     setHasUnappliedChanges(false);
+    if (!filters.useDynamicWeight) {
+      setHasInitializedWeights(false);
+    }
   }, [filters.useDynamicWeight]);
 
   // Call dynamic QoL API when Apply button is clicked
@@ -112,7 +121,7 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose, onQolUpda
     if (filters.useDynamicWeight && filters.weights && totalWeight === 100) {
       setIsApplying(true);
       try {
-        const payload: { [key: string]: any } = {};
+        const payload: { [key: string]: number | { weight: number; direction: string } } = {};
 
         for (const key of Object.keys(filters.weights || {})) {
           const weightValue = filters.weights[key as WeightKey];
@@ -138,7 +147,6 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose, onQolUpda
           setIsApplying(false);
           return;
         }
-
         const response = await httpClient.post<RentalScore[]>("/api/dynamicQol", payload);
         if (onQolUpdate) onQolUpdate(response.data);
         setHasUnappliedChanges(false);
@@ -151,6 +159,7 @@ const RentalFilter: React.FC<Props> = ({ filters, setFilters, onClose, onQolUpda
   };
 
   const handleWeightChange = (key: WeightKey, value: number) => {
+    console.log(`Weight change: ${key} = ${value}`);
     setFilters({
       ...filters,
       weights: {
