@@ -19,4 +19,5 @@ dependencies = [
     "langchain-openai>=0.3.32",
     "langgraph>=0.6.6",
     "langchain-core>=0.3.75",
+    "faiss-cpu>=1.12.0",
 ]
