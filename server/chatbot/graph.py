@@ -12,6 +12,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
 
 from langgraph.graph import StateGraph, END
+from langchain.retrievers.multi_query import MultiQueryRetriever
 
 from .prompts import create_sql_prompt, create_rag_prompt, create_general_prompt
 from ..utils.chatbot_db import get_db_connection
@@ -26,8 +27,6 @@ embeddings = OpenAIEmbeddings(model="text-embedding-3-small", api_key=settings.O
 BASE_DIR = Path(__file__).resolve().parent    # .../server/chatbot
 INDEX_DIR = BASE_DIR.parent / "faiss_index"   # .../server/faiss_index
 vector_store = FAISS.load_local(str(INDEX_DIR), embeddings, allow_dangerous_deserialization=True)
-retriever = vector_store.as_retriever(search_kwargs={"k": 5})
-print("Successfully loaded RAG knowledge base.")
 
 # Set up LLM agent
 agent = ChatOpenAI(
@@ -35,6 +34,12 @@ agent = ChatOpenAI(
     temperature=0,
     api_key=settings.OPENAI_API_KEY,
 )
+
+base_retriever = vector_store.as_retriever(search_kwargs={"k": 7})
+retriever = MultiQueryRetriever.from_llm(
+    retriever=base_retriever, llm=agent
+)
+print("Successfully loaded RAG knowledge base with Multi-Query Retriever.")
 
 
 class GraphState(TypedDict):
@@ -130,6 +135,15 @@ def rag_retrieval_node(state: GraphState):
     print("--- NODE: RAG Retrieval ---")
     last_message = state["messages"][-1].content
     retrieved_docs = retriever.invoke(last_message)
+
+    # --- 在這裡加上偵錯用的 print 迴圈 ---
+    print("\n--- DOCUMENTS RETRIEVED ---")
+    for i, doc in enumerate(retrieved_docs):
+        print(f"--- Document {i+1} ---")
+        print(doc.page_content)
+        print("-----------------------\n")
+    # --- 偵錯程式碼結束 ---
+
     context_str = "\n\n".join([doc.page_content for doc in retrieved_docs])
     return {"context": context_str}
 
@@ -166,6 +180,8 @@ def route_question(state: GraphState) -> Literal["sql", "rag", "chat"]:
     route = router_chain.invoke({}).strip().lower()
 
     print(f"--- ROUTER decided: {route} ---")
+    print(f"Last message was: {last_message}")
+
     if "sql" in route:
         return "sql"
     if "rag" in route:
