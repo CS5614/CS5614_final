@@ -6,7 +6,6 @@ from fastapi.staticfiles import StaticFiles
 from .routes.rental_score import router as rental_score_router
 from .routes.bus_stop_list import router as bus_list_router
 from .routes.park_list import router as park_list_router
-from .routes.get_config import router as config_router
 from .routes.dynamic_qol import router as dynamic_qol_router
 from .routes.chatbot_route import router as chatbot_router
 
@@ -38,7 +37,6 @@ def create_app() -> FastAPI:
     app.include_router(rental_score_router)
     app.include_router(bus_list_router)
     app.include_router(park_list_router)
-    app.include_router(config_router)
     app.include_router(dynamic_qol_router)
     app.include_router(chatbot_router)
 
