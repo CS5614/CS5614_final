@@ -9,8 +9,10 @@ import {
 import { RentalScoreContext } from "../contexts/RentalScoreContext";
 import { MapFilter, RentalScore } from "../type";
 import RentalInfoWindow from "./RentalInfoWindow";
-import { getGoogleMapsApiKey } from "../config";
 
+// Change the apikey from fetching from backend to constant variable in frontend
+// api access restriction is set on GCP
+const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const center = { lat: 38.891014, lng: -77.026703 };
 
 // Interface for the props being passed INTO this component
@@ -28,23 +30,6 @@ const Map: React.FC<MapProps> = ({ filters, comparisonList, onToggleCompare }) =
   const [locationsAtPoint, setLocationsAtPoint] = useState<RentalScore[]>([]);
   const [currentLocationIndex, setCurrentLocationIndex] = useState(0);
 
-  const [apiKey, setApiKey] = useState<string | null>(null);
-  const [loadingKey, setLoadingKey] = useState(true);
-  const [keyError, setKeyError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchKey = async () => {
-      try {
-        const key = await getGoogleMapsApiKey();
-        setApiKey(key);
-      } catch (err: any) {
-        setKeyError(err.message || "Failed to load map configuration.");
-      } finally {
-        setLoadingKey(false);
-      }
-    };
-    fetchKey();
-  }, []);
 
   const filterRentalLocations = (
     locations: RentalScore[],
@@ -114,8 +99,15 @@ const Map: React.FC<MapProps> = ({ filters, comparisonList, onToggleCompare }) =
     { color: "red", range: "Below 40", icon: "🏚️" },
   ];
 
-  if (loadingKey) return <div className="flex justify-center items-center h-screen">Loading Map...</div>;
-  if (keyError || !apiKey) return <div className="flex justify-center items-center h-screen">Error: {keyError}</div>;
+
+  // Check if api key exists
+  if (!apiKey) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Error: missing Google Maps API key.
+      </div>
+    );
+  }
 
   return (
     <APIProvider apiKey={apiKey}>
